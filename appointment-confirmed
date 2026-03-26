@@ -1,0 +1,217 @@
+
+
+
+<!doctype html><html lang="en" ><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1" /><meta name="HandheldFriendly" content="true" /><title></title><link rel="preconnect" href="https://assetslp.link" /><link rel="preconnect" href="https://styles.assets-landingi.com" /><link rel="preconnect" href="https://fonts.assets-landingi.com" /><link rel="preconnect" href="https://scripts.assets-landingi.com" /><link rel="preconnect" href="https://images.assets-landingi.com" /><link rel="preconnect" href="https://cdn.lugc.link" /><link rel="dns-prefetch" href="https://fonts.googleapis.com" /><link rel="dns-prefetch" href="https://fonts.gstatic.com" /><link rel="dns-prefetch" href="https://icons.assets-landingi.com" /><link rel="dns-prefetch" href="https://www.googletagmanager.com" /><link rel="dns-prefetch" href="https://tagmanager.landingi.io" /><link rel="dns-prefetch" href="https://lightboxes.landingi.com" /><link rel="dns-prefetch" href="https://old.assets-landingi.com" /><link rel="dns-prefetch" href="https://popups.landingi.com" /><link rel="preload" href="/assets/js/landend/frodo.js" as="script"><link rel="preload" href="https://ucarecdn.com/libs/blinkloader/3.x/blinkloader.min.js" as="script"><link rel="preload" href="https://assetslp.link/assets/js/landend/lazysizes.min.js?v=11122024151600" as="script">
+<link rel="preload" fetchpriority="high" media="(min-width: 764px)" as="image" href="https://cdn.lugc.link/0e9a2ba7-68d7-49f6-9e35-327b484c5789/-/preview/240x305/-/format/auto/"><link rel="preload" fetchpriority="high" media="(max-width: 763px) and ((-webkit-max-device-pixel-ratio: 1.9) or (max-resolution: 1.9dppx))" as="image" href="https://cdn.lugc.link/0e9a2ba7-68d7-49f6-9e35-327b484c5789/-/preview/240x304/-/format/auto/"><script fetchpriority="high">
+(function(src, cb) {
+var s = document.createElement('script'); s.setAttribute('src', src); s.setAttribute('fetchpriority', 'high');
+s.onload = cb; (document.head || document.body).appendChild(s);
+})('https://ucarecdn.com/libs/blinkloader/3.x/blinkloader.min.js', function() {
+window.Blinkloader.optimize({
+fadeIn:false,
+lazyload:true,
+smartCompression:true,
+responsive:true,
+retina:true,
+webp:true,
+pubkey:'ca6af56c901b93c58ffa',
+cdnBase:'https://cdn.lugc.link'
+});
+
+
+if (window.location !== window.parent.location) {
+window.onload = function() {
+setTimeout(function () {
+window.dispatchEvent(new CustomEvent('scroll'))
+}, 500);
+};
+}
+})
+</script>
+
+
+<link rel="preload" href="https://assetslp.link/assets/js/landend/jquery-3-6-0.min.js" as="script"><link href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,700,700i&subset=latin,latin-ext&display=swap" type="text/css" rel="preload" as="style" fetchpriority="high" onload="this.onload=null;this.rel='stylesheet'"><link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext&display=swap" type="text/css" rel="preload" as="style" fetchpriority="high" onload="this.onload=null;this.rel='stylesheet'"><link href="https://styles.assets-landingi.com/assets/css/170325-landend-base.css" type="text/css" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"><link href="https://styles.assets-landingi.com/bZSo9zINFKhXRA77/base.css" type="text/css" rel="stylesheet"><script>
+var landingiInternalDetails = {
+'landing_id': '2022031',
+'landing_hash': '46b63bf12eaa5d3b7314',
+'landing_variant_hash': '',
+'landing_name': 'Booking+Confirmation+Page',
+'landing_lang': 'en',
+'account_uuid': '1f0c74a7-2cca-61a2-a478-bd03b189c610',
+'apikey': '7db7c328-f462-4c3a-8edc-ca68f1702d6a'
+}
+</script><script>
+(async function (w, d) {
+try {
+const response = await w.fetch(
+'https://' + 'tagmanager.landingi.io' + '/account/' + '1f0c74a7-2cca-61a2-a478-bd03b189c610'
+);
+const gtm = await response.json();
+
+
+if (gtm) {
+const script = d.head.getElementsByTagName('script')[0];
+const tmpl = d.createElement('template');
+tmpl.innerHTML = gtm;
+tmpl.content.childNodes.forEach((node) => {
+let elem = node;
+
+
+if ('SCRIPT' === node.nodeName) {
+elem = d.createElement('script');
+
+
+if (node.textContent) {
+elem.textContent = node.textContent;
+}
+
+
+if (node.src) {
+elem.src = node.src;
+elem.type = node.type;
+}
+
+
+script.parentNode.insertBefore(elem, script);
+}
+
+
+if ('STYLE' === node.nodeName) {
+elem = d.createElement('style');
+
+
+if (node.textContent) {
+elem.textContent = node.textContent;
+}
+
+
+script.parentNode.insertBefore(elem, script);
+}
+})
+}
+} catch (err) {
+console.log(err);
+}
+})(window, document);
+</script><script>
+window.lazySizesConfig = window.lazySizesConfig || {};
+window.lazySizesConfig.init = false;
+</script>
+<script data-cookieconsent="ignore" type="text/javascript" src="https://assetslp.link/assets/js/landend/lazysizes.min.js?v=11122024151600"></script>
+<script>
+lazySizes.init();
+</script><script defer fetchpriority="low" src="https://scripts.assets-landingi.com/landend/190825/lightbox-render.js?v=1773803665"></script><script>
+window.addEventListener('load', function () {
+LightboxRender.init({
+useAaf: false
+})
+});
+</script></head><body id="Zcc579e32ab7c2c234c287cbcbc03f3a7639f9f1" ><!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5M8LTCF8"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div id="eDGnq2nM3LWi0OMhrhuOnKiH2aTwI0QH" class="widget widget-section " >
+<div class="row">
+
+
+<div class="container " >
+
+
+<img id="NLKx7TibpllEQzMqzEO3s3JH03Xh7W0i"
+data-original="https://images.assets-landingi.com/uc/0e9a2ba7-68d7-49f6-9e35-327b484c5789/PostBookingPage.png"
+class="widget widget-image "
+srcset="https://cdn.lugc.link/0e9a2ba7-68d7-49f6-9e35-327b484c5789/-/preview/240x304/-/format/auto/ 240w, https://cdn.lugc.link/0e9a2ba7-68d7-49f6-9e35-327b484c5789/-/preview/240x305/-/format/auto/ 240w" sizes="(max-width: 763px) 240px, 240px" src="https://cdn.lugc.link/0e9a2ba7-68d7-49f6-9e35-327b484c5789/-/preview/240x304/-/format/auto/"
+
+
+alt=""
+width="241" height="306"
+
+
+fetchpriority="high"
+><div id="bmTIPGr1nFvwxikKdn0rzuGXapQEKtGE" class="widget widget-text"><h2>You’re Appointment Has Been Scheduled</h2></div>
+</div>
+</div>
+</div>
+<div id="OKQ7ll1cxaJCK0HJpc0cfgpGPysTNVOI" class="widget widget-section " >
+<div class="row">
+
+
+<div class="container " >
+
+
+<div id="hPZOTKUArXLvIgRR4aHa9wH2aVihaRWN" class="widget widget-text"><p>🚧<b>You will receive an email confirming your appointment time, along with details to login to our scheduling platofrm, Jane.app.</b></p><p><b><br></b></p><p><b> Please show up at least 5 minutes early.</b></p><p><b><br></b></p><p>If you need to edit/modify, reschedule or cancel your appointment please do so at least 48 hours ahead of the appointment time out of courtesy for your therapist as well as other people that will take the appointment. You can do this from the same email with login details to our booking platform Jane.</p><p><span style="letter-spacing: 0px;"><br></span></p><p><br></p></div><div id="LVFhBD662WOGV5lUJvxtrrc2VF7iOJxU" class="widget widget-box" ></div><div id="TUM1F5Q8IOq84IcSKQMbl9h55AvGtd1s" class="widget widget-text"><h2>What's Next?</h2></div><div id="GmUlT340zZis2xIbi8Z8KPLKEHuufLkH" class="widget widget-box" ></div><div id="mH3fEU1CJ7oLA52yFEzdVtToHIl7W2l2" class="widget widget-box" ></div>
+</div>
+</div>
+</div>
+<div id="ig9M7uLXHpsRZt493AT9dyqrx13duvBl" class="widget widget-section " >
+<div class="row">
+
+
+<div class="container " >
+
+
+<div id="xmw2MTVa1a6oo4iyq071zVnWCBLULDZF" class="widget widget-text"><h2>👉How to Get To Your Appointment</h2></div><div id="NblKthFTkOdsdQTB56OGdJ0VNHlwgCGh" class="widget widget-text"><h2>We can't wait to get to know you and help guide you to achieving your goals</h2></div><div id="xaGzTa5ghUPoD1cuRrapHIriTBdv7aAH" class="widget widget-text"><p>We're located at 213 19 St NW #4</p><p>Calgary, AB T2N 2H9</p></div><div id="KVaJuu0HUTwIrHSAm6WK2IIh691maqA3" class="widget widget-text"><h2><a href="https://maps.app.goo.gl/Shgocn48xACE4Buv9" target="_blank" style="color: rgb(16, 63, 250); text-decoration: underline;"><b>Click Here To See a Map and Driving Directions</b></a></h2></div><a href="https://maps.app.goo.gl/Shgocn48xACE4Buv9"
+id="oHiX1w3guWpLwFfsJdPDiExoMnMHJky6"
+class="widget widget-svgicon"
+aria-label="Icon"
+
+
+target="_blank">
+<img src="https://icons.assets-landingi.com/icon_0e920fc89f826d2166cdc823e5236d42.svg" alt="" />
+</a>
+</div>
+</div>
+</div>
+<div id="rZo7CkvBQIW4OiHhzeSw9CAHHEsq6lVm" class="widget widget-section " >
+<div class="row">
+
+
+<div class="container " >
+
+
+<div id="hnfHrAX2XIvcMe5GlqVw08oaCgn1GOcE" class="widget widget-text"><p>Maximum Health Massage Therapy Calgary</p><p>Proudly serving Calgary since 1998</p></div><div id="QqnbfqdMzdlC4J73QItQpJ94gNSl0MwD" class="widget widget-text"><p><a href="https://go.maximummassage.ca/privacy-policy" target="_blank" style="color: rgb(16, 63, 250); text-decoration: underline;"><b>Privacy Policy</b></a> | <a href="https://go.maximummassage.ca/terms" target="_blank" style="color: rgb(16, 63, 250); text-decoration: underline;"><b>Terms of Use </b></a></p><p>Copyright © 2025</p><p><br></p><p><span style="color: rgba(var(--color-tertiary-3), 1);">By using this site, you agree that all content is for general informational purposes only and does not constitute medical advice or create a therapist–client relationship. Submitting information through this site does not book an appointment or establish care. We may use cookies, analytics, and advertising tools to improve your experience. For details on data collection, consent, and your rights, please review our full Privacy Policy and Terms of Service.</span></p><p><span style="color: rgba(var(--color-tertiary-3), 1);"><br></span></p><p><span style="color: rgba(var(--color-tertiary-3), 1);">The quiz on this page is not a medical assessment and should not be used to diagnose, treat, or manage any health condition. It simply helps us understand what type of practitioner may be the best fit for you.</span></p></div><img id="bOQm4WL7eAwlDLNnTdlmNqaBDHEdUdZy"
+data-original="https://images.assets-landingi.com/uc/e87a2565-21be-48c5-b993-e959a80034bb/MaximumHealthmassagetherapycalgarycompressed.png"
+class="widget widget-image lazyload"
+data-srcset="https://cdn.lugc.link/e87a2565-21be-48c5-b993-e959a80034bb/-/preview/273x47/-/format/auto/ 273w, https://cdn.lugc.link/e87a2565-21be-48c5-b993-e959a80034bb/-/preview/500x89/-/format/auto/ 500w" data-sizes="(max-width: 763px) 273px, 500px" data-src="https://cdn.lugc.link/e87a2565-21be-48c5-b993-e959a80034bb/-/preview/273x47/-/format/auto/"
+
+
+alt=""
+width="500" height="89"
+
+
+decoding="async"
+><div id="G2drJeTUJMme5waTaNEQ8htO8igSywJm" class="widget widget-text"><p>Located at 213 19 St NW #4, Calgary, AB T2N 2H9</p><p>Advertising and Design by <a href="smartpractitioner.io" target="_blank" style="color: rgb(16, 63, 250); text-decoration: underline;"><b>smartpractitioner.io</b></a></p></div>
+</div>
+</div>
+</div><script type="text/javascript" src="https://assetslp.link/assets/js/landend/jquery-3-6-0.min.js" fetchpriority="high"></script> <script src="/assets/js/landend/frodo.js"></script>
+<script>
+const lpStatsModule = (function () {
+const url = "https://stats.landingi.com/visit/2022031";
+const data = {"lid":2022031,"luuid":"58317c4c-4090-4f43-88b3-00a38fa34cbd","lhash":"46b63bf12eaa5d3b7314","fid":2022031,"auuid":"1f0c74a7-2cca-61a2-a478-bd03b189c610","acid":377584,"agid":null,"tid":null,"hasAccessToEventTracker":false,"hasAccessToEventTrackerDev":false,"hasAccessToVisitWithoutCookie":false,"hasAccessToExternalEvents":false};
+const cookieName = "ls_sid_2022031";
+
+
+if (data.hasAccessToEventTrackerDev) {
+console.log('Running runScript in dev mode')
+frodo.runScriptDev(cookieName, url, data)
+} else {
+frodo.runScript(cookieName, url, data)
+}
+
+
+return {
+getData: function() { return data; },
+cookieName: function() { return cookieName; },
+endpoint: function() { return url; },
+path: function() { return path; }
+};
+})();
+</script><script defer type="text/javascript" src="https://scripts.assets-landingi.com/landend/160721/files.js"></script><script defer fetchpriority="low" type="text/javascript" src="https://old.assets-landingi.com/assets/js/vendor/jquery-form/jquery.form.min.js"></script> <script type="text/javascript" src="https://scripts.assets-landingi.com/landend/141025/new_landend.js"></script><!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5M8LTCF8');</script>
+<!-- End Google Tag Manager --></body></html>
+
+
