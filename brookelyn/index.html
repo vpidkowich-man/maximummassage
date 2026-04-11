@@ -100,7 +100,7 @@ window.addEventListener('load', function () {
         useAaf: false
     })
 });
-</script></head><body id="Zcc579e32ab7c2c234c287cbcbc03f3a7639f9f1" ><!-- Google Tag Manager (noscript) -->
+</script><link rel="stylesheet" href="/assets/css/overrides.css"></head><body id="Zcc579e32ab7c2c234c287cbcbc03f3a7639f9f1" ><!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5M8LTCF8"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
@@ -201,20 +201,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   Cal("init", "60min", {origin:"https://app.cal.com"});
   Cal.ns["60min"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#0dffd5"}},"hideEventTypeDetails":false,"layout":"week_view"});
 
-  window.addEventListener("load", function () {
-    // Pass the entire query string from the current page directly to the Cal.com link.
-    // Anything in the URL (?utm_source=google&utm_medium=cpc&...) gets forwarded as-is.
-    var qs = window.location.search; // e.g. "?utm_source=google&utm_medium=cpc"
-    var calLink = "bbrolly/60min" + qs;
-
+  // DOMContentLoaded (not load) so clicks are wired up before the user can
+  // interact; Cal() API calls are queued by Cal.com's stub, so the very first
+  // click opens the modal even while embed.js is still downloading.
+  document.addEventListener("DOMContentLoaded", function () {
+    var calHandle = "bbrolly/60min";
     var links = document.querySelectorAll("a, button");
     links.forEach(function (el) {
       if (el.textContent.trim().includes("Book With Brookelyn")) {
-        el.setAttribute("data-cal-link", calLink);
-        el.setAttribute("data-cal-namespace", "60min");
-        el.setAttribute("data-cal-config", '{"layout":"week_view","useSlotsViewOnMobile":"true"}');
         el.addEventListener("click", function (e) {
           e.preventDefault();
+          Cal.ns["60min"]("modal", {
+            calLink: calHandle + window.location.search,
+            config: { layout: "week_view", useSlotsViewOnMobile: "true" }
+          });
         });
       }
     });

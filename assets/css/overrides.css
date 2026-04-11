@@ -1,0 +1,16 @@
+/* Project-level overrides applied on top of the Landingi-generated CSS.
+   Keep this file minimal — each rule should have a comment explaining
+   what it fixes so future edits don't regress the intent. */
+
+/* Therapist credentials: push list items right so the absolutely-positioned
+   icons (clock, graduation cap, ribbon, etc.) don't overlap the text. The
+   original layout relied on inconsistent leading &nbsp; which shifted per
+   page. :has() gives us a clean way to leave the bold headings
+   (<p><b>Trainings and Certifications</b></p>, "Additional training", etc.)
+   flush left while indenting the rest. */
+#triiKLLuvNNa5kZgUyHpK2ceUNnsn0Fe > p {
+  padding-left: 55px;
+}
+#triiKLLuvNNa5kZgUyHpK2ceUNnsn0Fe > p:has(> b) {
+  padding-left: 0;
+}

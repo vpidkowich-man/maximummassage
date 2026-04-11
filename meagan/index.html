@@ -100,7 +100,7 @@ window.addEventListener('load', function () {
         useAaf: false
     })
 });
-</script></head><body id="Zcc579e32ab7c2c234c287cbcbc03f3a7639f9f1" ><!-- Google Tag Manager (noscript) -->
+</script><link rel="stylesheet" href="/assets/css/overrides.css"></head><body id="Zcc579e32ab7c2c234c287cbcbc03f3a7639f9f1" ><!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5M8LTCF8"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
@@ -217,17 +217,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
   Cal("init", "60min", {origin:"https://app.cal.com"});
   Cal.ns["60min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
-  window.addEventListener("load", function () {
-    var qs = window.location.search;
-    var calLink = "meaganb/60min" + qs;
+  // DOMContentLoaded (not load) so clicks are wired up before the user can
+  // interact; Cal() API calls are queued by Cal.com's stub, so the very first
+  // click opens the modal even while embed.js is still downloading.
+  document.addEventListener("DOMContentLoaded", function () {
+    var calHandle = "meaganb/60min";
     var links = document.querySelectorAll("a, button");
     links.forEach(function (el) {
       if (el.textContent.trim().includes("Book With Meagan")) {
-        el.setAttribute("data-cal-link", calLink);
-        el.setAttribute("data-cal-namespace", "60min");
-        el.setAttribute("data-cal-config", '{"layout":"month_view","useSlotsViewOnMobile":"true"}');
         el.addEventListener("click", function (e) {
           e.preventDefault();
+          Cal.ns["60min"]("modal", {
+            calLink: calHandle + window.location.search,
+            config: { layout: "month_view", useSlotsViewOnMobile: "true" }
+          });
         });
       }
     });
