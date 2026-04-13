@@ -155,7 +155,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // interact; Cal() API calls are queued by Cal.com's stub, so the very first
   // click opens the modal even while embed.js is still downloading.
   document.addEventListener("DOMContentLoaded", function () {
-    var calHandle = "bbrolly/60min";
+    var calHandle = "lstauffer/60min";
     var links = document.querySelectorAll("a, button");
     links.forEach(function (el) {
       if (el.textContent.trim().includes("Book With Lindsey")) {
@@ -189,7 +189,7 @@ Cal("init", "60min", {origin:"https://app.cal.com"});
   Cal.ns["60min"]("inline", {
     elementOrSelector:"#my-cal-inline-60min",
     config: {"layout":"month_view","useSlotsViewOnSmallScreen":"true"},
-    calLink: "bbrolly/60min",
+    calLink: "lstauffer/60min",
   });
 
   Cal.ns["60min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view"});

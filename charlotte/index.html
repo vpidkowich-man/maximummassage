@@ -183,19 +183,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="custom-html-value" style="position: relative"><!-- Cal.com Popup on existing button -->
 <script type="text/javascript">
   (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-  Cal("init", "60min", {origin:"https://app.cal.com"});
-  Cal.ns["60min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
+  Cal("init", "90min", {origin:"https://app.cal.com"});
+  Cal.ns["90min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
   // DOMContentLoaded (not load) so clicks are wired up before the user can
   // interact; Cal() API calls are queued by Cal.com's stub, so the very first
   // click opens the modal even while embed.js is still downloading.
   document.addEventListener("DOMContentLoaded", function () {
-    var calHandle = "ctooth/60min";
+    var calHandle = "ctooth/90min";
     var links = document.querySelectorAll("a, button");
     links.forEach(function (el) {
       if (el.textContent.trim().includes("Book With Charlotte")) {
         el.addEventListener("click", function (e) {
           e.preventDefault();
-          Cal.ns["60min"]("modal", {
+          Cal.ns["90min"]("modal", {
             calLink: calHandle + window.location.search,
             config: { layout: "month_view", useSlotsViewOnMobile: "true" }
           });
@@ -215,18 +215,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             
             <div id="Gwuz7MPFW4sHWlOP3H7qmPrxNqL9st9x" class="widget widget-html">
     <div class="custom-html-value" style="position: relative"><!-- Cal inline embed code begins -->
-<div style="width:100%;height:100%;overflow:scroll" id="my-cal-inline-60min"></div>
+<div style="width:100%;height:100%;overflow:scroll" id="my-cal-inline-90min"></div>
 <script type="text/javascript">
   (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-Cal("init", "60min", {origin:"https://app.cal.com"});
+Cal("init", "90min", {origin:"https://app.cal.com"});
 
-  Cal.ns["60min"]("inline", {
-    elementOrSelector:"#my-cal-inline-60min",
+  Cal.ns["90min"]("inline", {
+    elementOrSelector:"#my-cal-inline-90min",
     config: {"layout":"month_view","useSlotsViewOnSmallScreen":"true"},
-    calLink: "bbrolly/60min",
+    calLink: "ctooth/90min",
   });
 
-  Cal.ns["60min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
+  Cal.ns["90min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
   </script>
   <!-- Cal inline embed code ends --></div>
 </div>
@@ -265,7 +265,7 @@ Cal("init", "60min", {origin:"https://app.cal.com"});
 </div><script type="text/javascript" src="/assets/js/landingi/jquery-3-6-0.min.js" fetchpriority="high"></script>        <script src="/assets/js/landingi/frodo.js"></script>
 <script defer type="text/javascript" src="/assets/js/landingi/files.js"></script><script defer fetchpriority="low" type="text/javascript" src="/assets/js/landingi/jquery.form.min.js"></script> <script type="text/javascript" src="/assets/js/landingi/new_landend.js"></script><!-- Redirect on successful booking (uses namespaced listener) -->
   <script>
-    Cal.ns["60min"]("on", {
+    Cal.ns["90min"]("on", {
       action: "bookingSuccessfulV2",
       callback: (e) => {
         const { data } = e.detail;
@@ -275,8 +275,8 @@ Cal("init", "60min", {origin:"https://app.cal.com"});
   </script><!-- Cal element-click embed code begins -->
 <script type="text/javascript">
   (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-  Cal("init", "60min", {origin:"https://app.cal.com"});
-  Cal.ns["60min"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#0dffd5"}},"hideEventTypeDetails":false,"layout":"week_view"});
+  Cal("init", "90min", {origin:"https://app.cal.com"});
+  Cal.ns["90min"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#0dffd5"}},"hideEventTypeDetails":false,"layout":"week_view"});
 </script>
 <!-- Cal element-click embed code ends --><!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

@@ -15,6 +15,18 @@
   padding-left: 0;
 }
 
+/* Hide the stray duplicate "Trainings and Certifications" block that
+   Landingi left hardcoded with Brookelyn's content on every therapist
+   page. The correct per-therapist credentials live in the widget with
+   id triiKLLuv... above; these four widgets were an unedited template
+   duplicate showing the wrong therapist's credentials. */
+#uQKMVH8Bp7R94HIQMZAe2Dyvha63TCwC,
+#DyQTWpHlFpJ8Dx1hozVfNSr43fciE9MU,
+#zgaoMAcBi2Bah5pzKQSKiMuHA3pZceWb,
+#bGztaS9epsDSGsmPmM0hBBVIA6OkQm96 {
+  display: none !important;
+}
+
 /* =============================================================
    Quiz lightbox — used on the main landing page. The inline quiz
    section caused dynamic height jumps as each question rendered;
@@ -23,79 +35,101 @@
    immersion matters most, and a centered card on desktop.
    ============================================================= */
 .quiz-lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important; /* max int — beat any Landingi widget z-index */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  background: transparent !important;
 }
-.quiz-lightbox[hidden] { display: none; }
+.quiz-lightbox[hidden] { display: none !important; }
 
 .quiz-lightbox__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(2px);
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(15, 23, 42, 0.78) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  backdrop-filter: blur(3px) !important;
 }
 
 .quiz-lightbox__dialog {
-  position: relative;
-  background: #fff;
-  width: 100%;
-  max-width: 640px;
-  height: min(90vh, 820px);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-  display: flex;
+  position: relative !important;
+  background: #ffffff !important;
+  width: 100% !important;
+  max-width: 640px !important;
+  height: min(90vh, 820px) !important;
+  max-height: 90vh !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
 }
 
 .quiz-lightbox__dialog iframe {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 1 auto !important;
+  border: 0 !important;
+  background: #ffffff !important;
 }
 
 .quiz-lightbox__close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  z-index: 2;
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  color: #0f172a;
-  font-size: 26px;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  transition: transform 120ms ease, background 120ms ease;
+  position: absolute !important;
+  top: 10px !important;
+  right: 12px !important;
+  z-index: 2 !important;
+  width: 36px !important;
+  height: 36px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+  font-size: 26px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+  transition: transform 120ms ease, background 120ms ease !important;
+  padding: 0 !important;
 }
 .quiz-lightbox__close:hover,
 .quiz-lightbox__close:focus {
-  background: #fff;
-  transform: scale(1.05);
+  background: #ffffff !important;
+  transform: scale(1.05) !important;
 }
 
 html.quiz-lightbox-open,
 html.quiz-lightbox-open body {
-  overflow: hidden;
+  overflow: hidden !important;
 }
 
 @media (max-width: 640px) {
-  .quiz-lightbox { padding: 0; }
+  .quiz-lightbox { padding: 0 !important; }
   .quiz-lightbox__dialog {
-    max-width: 100%;
-    height: 100%;
-    border-radius: 0;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
   }
   .quiz-lightbox__close {
-    top: 8px;
-    right: 8px;
+    top: 8px !important;
+    right: 8px !important;
   }
 }
