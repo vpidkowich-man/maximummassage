@@ -1,0 +1,145 @@
+/* Legal pages (Privacy Policy, Terms of Service).
+   Standalone stylesheet — these pages do NOT load the Landingi CSS
+   framework, so nothing here has to fight existing selectors. Keep it
+   simple, readable, and matching the brand voice of the landing page. */
+
+:root {
+  --policy-ink: #0f172a;
+  --policy-muted: #475569;
+  --policy-brand: #14b8a6; /* teal to match the main landing accent */
+  --policy-rule: #e2e8f0;
+  --policy-bg: #fafafa;
+  --policy-card: #ffffff;
+  --policy-max: 760px;
+  --policy-font: 'Raleway', 'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--policy-bg);
+  color: var(--policy-ink);
+  font-family: var(--policy-font);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.policy-header {
+  background: #ffffff;
+  border-bottom: 1px solid var(--policy-rule);
+  padding: 28px 24px;
+}
+.policy-header__inner {
+  max-width: var(--policy-max);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.policy-header a {
+  color: var(--policy-brand);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.policy-header__back {
+  color: var(--policy-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.policy-header__back:hover { color: var(--policy-brand); }
+
+.policy {
+  max-width: var(--policy-max);
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+
+.policy__card {
+  background: var(--policy-card);
+  border: 1px solid var(--policy-rule);
+  border-radius: 14px;
+  padding: 48px 48px 56px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.policy h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--policy-ink);
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+.policy__updated {
+  color: var(--policy-muted);
+  font-size: 0.9rem;
+  margin: 0 0 28px;
+}
+
+.policy h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--policy-brand);
+  margin: 40px 0 14px;
+  padding-top: 24px;
+  border-top: 1px solid var(--policy-rule);
+}
+.policy h2:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 16px;
+}
+
+.policy h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--policy-ink);
+  margin: 24px 0 8px;
+}
+.policy h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--policy-ink);
+  margin: 18px 0 6px;
+}
+
+.policy p {
+  margin: 0 0 14px;
+  color: var(--policy-ink);
+}
+
+.policy ul {
+  margin: 0 0 18px;
+  padding-left: 22px;
+}
+.policy li {
+  margin-bottom: 6px;
+  color: var(--policy-ink);
+}
+
+.policy a {
+  color: var(--policy-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.policy a:hover { text-decoration-thickness: 2px; }
+
+.policy-footer {
+  max-width: var(--policy-max);
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  text-align: center;
+  color: var(--policy-muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .policy { padding: 24px 16px 64px; }
+  .policy__card { padding: 28px 22px 36px; border-radius: 10px; }
+  .policy h1 { font-size: 1.7rem; }
+  .policy h2 { font-size: 1.15rem; margin-top: 32px; padding-top: 20px; }
+}
