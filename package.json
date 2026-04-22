@@ -1,0 +1,11 @@
+{
+  "name": "maximummassage-reports",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:monthly": "node scripts/build-monthly-report.mjs"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}

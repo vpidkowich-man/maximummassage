@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Schedule Capacity Report · Maximum Massage Therapy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F7F4EF; font-family: 'DM Sans', sans-serif; }
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: #EDE9E3; outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #2D5242; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+  button { cursor: pointer; border: none; outline: none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+const {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Cell, LabelList
+} = Recharts;
+
+const C = {
+  bg: "#F7F4EF", card: "#FFFFFF",
+  green: "#2D5242", greenLight: "#3D6B56", greenPale: "#EAF0EC",
+  gold: "#B8913F", goldLight: "#F0E4C6",
+  empty: "#D9CFC3", text: "#1A1A1A", muted: "#6B6459",
+  accent: "#C4653A", cancelled: "#C4653A",
+};
+
+const DATA = {
+  "4mo": [
+    { name: "Brooklyn", booked: 128, cancelled: 16, empty: 196, shift: 324, pct: 40 },
+    { name: "Charlotte", booked: 37,  cancelled: 0,  empty: 165, shift: 203, pct: 18 },
+    { name: "Lindsey",   booked: 81,  cancelled: 23, empty: 75,  shift: 156, pct: 52 },
+    { name: "Meagan",    booked: 37,  cancelled: 11, empty: 18,  shift: 55,  pct: 66 },
+  ],
+  "12mo": [
+    { name: "Brooklyn", booked: 388, cancelled: 16, empty: 571, shift: 959, pct: 40 },
+    { name: "Charlotte", booked: 117, cancelled: 0,  empty: 411, shift: 528, pct: 22 },
+    { name: "Lindsey",   booked: 353, cancelled: 23, empty: 291, shift: 644, pct: 55 },
+    { name: "Meagan",    booked: 136, cancelled: 11, empty: 82,  shift: 218, pct: 62 },
+  ],
+};
+
+const RATE = 124, INTRO = 49, CONVERSION = 0.30, ANNUAL_LTV = 208 * 12;
+const fmt = v => v >= 1000 ? `$${Math.round(v/1000)}k` : `$${v}`;
+
+const CapacityTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  const get = key => payload.find(p => p.dataKey === key)?.value ?? 0;
+  return (
+    <div style={{ background: C.green, color: "#fff", borderRadius: 10, padding: "12px 16px", fontSize: 13, fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 20px rgba(0,0,0,0.25)", minWidth: 180 }}>
+      <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 14 }}>{label}</div>
+      {[["bookedPct","#a8d4bc","✓ Booked"],["cancelledPct","#e8b499","✗ Cancelled"],["emptyPct","#c8bfb5","○ Never Filled"]].map(([k,col,lbl]) => (
+        <div key={k} style={{ display:"flex", justifyContent:"space-between", gap:16, marginBottom:3 }}>
+          <span style={{ color: col }}>{lbl}</span>
+          <span style={{ fontWeight:700 }}>{get(k)}%</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const SlotTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: C.green, color: "#fff", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}>
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
+      <div>{fmt(payload[0].value)} per slot</div>
+    </div>
+  );
+};
+
+const KPI = ({ label, value, sub, color, accent }) => (
+  <div style={{ background: color||C.card, borderRadius:14, padding:"22px 18px", flex:1, minWidth:140, boxShadow:"0 2px 12px rgba(0,0,0,0.06)", border:"1px solid rgba(0,0,0,0.06)", borderTop: accent ? `3px solid ${accent}` : undefined }}>
+    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, fontWeight:700, color:accent||C.green, lineHeight:1, marginBottom:6 }}>{value}</div>
+    <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.04em", textTransform:"uppercase", marginBottom: sub?4:0 }}>{label}</div>
+    {sub && <div style={{ fontSize:11, color:C.muted, lineHeight:1.5 }}>{sub}</div>}
+  </div>
+);
+
+const Step = ({ n, children }) => (
+  <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
+    <div style={{ width:28,height:28,borderRadius:"50%",background:C.green,color:"#fff",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>{n}</div>
+    <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:C.text, margin:0 }}>{children}</h2>
+  </div>
+);
+
+const WRow = ({ label, value, max, color, sub, bold }) => (
+  <div style={{ marginBottom:18 }}>
+    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:6 }}>
+      <span style={{ fontSize:13, color:bold?C.text:C.muted, fontWeight:bold?700:400 }}>{label}</span>
+      <span style={{ fontSize:15, fontWeight:700, color:color||C.green }}>{fmt(value)}</span>
+    </div>
+    <div style={{ height:10, background:"#EDE9E3", borderRadius:5, overflow:"hidden" }}>
+      <div style={{ height:"100%", width:`${Math.min(100,(value/max)*100)}%`, background:color||C.green, borderRadius:5 }} />
+    </div>
+    {sub && <div style={{ fontSize:11, color:C.muted, marginTop:4 }}>{sub}</div>}
+  </div>
+);
+
+function App() {
+  const [win, setWin] = useState("12mo");
+  const [intro, setIntro] = useState(20);
+
+  const active = DATA[win];
+  const chartData = active.map(d => ({
+    name: d.name,
+    bookedPct:    Math.round(d.booked    / d.shift * 100),
+    cancelledPct: Math.round(d.cancelled / d.shift * 100),
+    emptyPct:     Math.round(d.empty     / d.shift * 100),
+  }));
+
+  const d12 = DATA["12mo"];
+  const totalEmpty12 = d12.reduce((s,d) => s+d.empty, 0);
+  const totalCanc12  = d12.reduce((s,d) => s+d.cancelled, 0);
+  const perMonthLost = Math.round((totalEmpty12 + totalCanc12) * RATE / 12);
+  const evPerSlot    = Math.round(CONVERSION * ANNUAL_LTV);
+
+  const slotData = [
+    { name:"Empty Slot",    value:0 },
+    { name:"$49 Intro",     value:INTRO },
+    { name:"$124 Regular",  value:RATE },
+    { name:"EV per Intro*", value:evPerSlot },
+  ];
+  const slotColors = [C.empty, C.gold, C.greenLight, C.green];
+
+  const introRev   = intro * INTRO;
+  const converted  = Math.round(intro * CONVERSION);
+  const annualRev  = converted * ANNUAL_LTV;
+  const twoYearRev = annualRev * 2;
+
+  return (
+    <div style={{ background:C.bg, minHeight:"100vh", padding:"40px 20px" }}>
+      <div style={{ maxWidth:740, margin:"0 auto" }}>
+
+        {/* HEADER */}
+        <div style={{ marginBottom:40, borderLeft:`4px solid ${C.green}`, paddingLeft:20 }}>
+          <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:C.gold, marginBottom:10 }}>Revenue Strategy · Smart Practitioner</div>
+          <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:36, fontWeight:700, color:C.text, lineHeight:1.2, margin:"0 0 12px" }}>
+            The Real Cost of<br />an Empty Treatment Room
+          </h1>
+          <p style={{ fontSize:14, color:C.muted, maxWidth:520, lineHeight:1.7, margin:0 }}>
+            12 months of your own scheduling data — straight from Jane — shows the opportunity sitting idle every single week.
+          </p>
+        </div>
+
+        {/* SECTION 1 */}
+        <div style={{ marginBottom:36 }}>
+          <Step n="1">Your Schedule: The Real Numbers</Step>
+
+          <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:16 }}>
+            <KPI value={`$${perMonthLost.toLocaleString()}`} label="Lost revenue / month" sub="Hours available but unfilled or cancelled — at your standard rate" accent={C.accent} />
+            <KPI value={`${Math.round(totalEmpty12/12)}h`}  label="Empty hours / month"  sub="Avg across all 4 therapists over 12 months" color={C.goldLight} />
+            <KPI value="40%"                                 label="Brooklyn's fill rate"  sub="Lowest of the 4 — 60% of her schedule sits empty every week" color={C.greenPale} accent={C.green} />
+          </div>
+
+          <div style={{ background:C.card, borderRadius:14, padding:"24px 20px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, flexWrap:"wrap", gap:10 }}>
+              <div>
+                <div style={{ fontSize:13, fontWeight:700, color:C.text }}>Schedule Utilization by Therapist</div>
+                <div style={{ fontSize:11, color:C.muted, marginTop:2 }}>% of total scheduled shift hours</div>
+              </div>
+              <div style={{ display:"flex", gap:6 }}>
+                {["4mo","12mo"].map(w => (
+                  <button key={w} onClick={() => setWin(w)} style={{ padding:"5px 14px", borderRadius:20, fontFamily:"'DM Sans',sans-serif", fontSize:12, fontWeight:600, background:win===w?C.green:"#EDE9E3", color:win===w?"#fff":C.muted, transition:"all 0.2s" }}>
+                    {w==="4mo"?"Last 4 Months":"Full 12 Months"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={chartData} margin={{ top:10, right:10, left:-15, bottom:0 }} barSize={52}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={v=>`${v}%`} tick={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, fill:C.muted }} domain={[0,100]} axisLine={false} tickLine={false} />
+                <Tooltip content={<CapacityTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
+                <Bar dataKey="bookedPct"    stackId="a" fill={C.green}     name="Booked">
+                  <LabelList dataKey="bookedPct"    position="center" formatter={v => v>6?`${v}%`:""} style={{ fill:"#fff", fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:700 }} />
+                </Bar>
+                <Bar dataKey="cancelledPct" stackId="a" fill={C.cancelled} name="Cancelled" />
+                <Bar dataKey="emptyPct"     stackId="a" fill={C.empty}     name="Never Filled" radius={[6,6,0,0]}>
+                  <LabelList dataKey="emptyPct" position="top" formatter={v => v>5?`${v}% idle`:""} style={{ fill:C.muted, fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:700 }} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+
+            <div style={{ display:"flex", gap:16, marginTop:12, justifyContent:"center", flexWrap:"wrap" }}>
+              {[[C.green,"Booked & Completed"],[C.cancelled,"Booked but Cancelled"],[C.empty,"Never Filled (Idle)"]].map(([col,lbl]) => (
+                <div key={lbl} style={{ display:"flex", alignItems:"center", gap:6 }}>
+                  <div style={{ width:10, height:10, borderRadius:2, background:col }} />
+                  <span style={{ fontSize:11, color:C.muted }}>{lbl}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop:16, background:"#FDF5EE", borderRadius:10, padding:"12px 16px", borderLeft:`3px solid ${C.accent}` }}>
+              <div style={{ fontSize:12, fontWeight:700, color:C.accent, marginBottom:4 }}>The pattern holds across both time windows</div>
+              <div style={{ fontSize:12, color:C.muted, lineHeight:1.6 }}>
+                Toggle between the last 4 months and the full year — the numbers barely move. Brooklyn sits at 40% either way. Charlotte at 22%. This isn't a slow season. It's a structural gap that advertising can fill.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:10, marginTop:12 }}>
+            {DATA["12mo"].map(d => {
+              const idlePct = Math.round((d.empty+d.cancelled)/d.shift*100);
+              const idleRev = Math.round((d.empty+d.cancelled)*RATE/12);
+              const col = d.pct<35?C.accent : d.pct<55?C.gold : C.green;
+              return (
+                <div key={d.name} style={{ background:C.card, borderRadius:10, padding:"14px 16px", boxShadow:"0 1px 6px rgba(0,0,0,0.05)", borderLeft:`3px solid ${col}` }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                    <div style={{ fontSize:14, fontWeight:700, color:C.text }}>{d.name}</div>
+                    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:col }}>{d.pct}% booked</div>
+                  </div>
+                  <div style={{ fontSize:11, color:C.muted, marginTop:4 }}>
+                    <strong style={{ color:C.text }}>{idlePct}% idle</strong> · ~${idleRev.toLocaleString()}/mo in unrealized revenue
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* SECTION 2 */}
+        <div style={{ marginBottom:36 }}>
+          <Step n="2">What Is Each Slot Actually Worth?</Step>
+          <div style={{ background:C.card, borderRadius:14, padding:"24px 20px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)" }}>
+            <ResponsiveContainer width="100%" height={210}>
+              <BarChart data={slotData} margin={{ top:10, right:10, left:-10, bottom:0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, fill:C.muted }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, fill:C.muted }} tickFormatter={fmt} axisLine={false} tickLine={false} />
+                <Tooltip content={<SlotTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
+                <Bar dataKey="value" radius={[6,6,0,0]}>
+                  {slotData.map((_,i) => <Cell key={i} fill={slotColors[i]} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <p style={{ fontSize:11, color:C.muted, marginTop:4, textAlign:"right" }}>
+              *EV = Expected Value per intro slot (30% conversion × ${ANNUAL_LTV.toLocaleString()} avg annual LTV)
+            </p>
+          </div>
+          <div style={{ display:"flex", gap:10, marginTop:12, flexWrap:"wrap" }}>
+            {[[C.empty,"Empty slot","Status quo. $0."],[C.gold,"$49 intro","Immediate upside."],[C.greenLight,"$124 regular","Your standard rate."],[C.green,`$${evPerSlot} EV`,"True value with LTV."]].map(([col,lbl,note]) => (
+              <div key={lbl} style={{ display:"flex", alignItems:"center", gap:8, flex:1, minWidth:130, background:C.card, borderRadius:8, padding:"8px 12px", boxShadow:"0 1px 6px rgba(0,0,0,0.05)" }}>
+                <div style={{ width:10, height:10, borderRadius:2, background:col, flexShrink:0 }} />
+                <div>
+                  <div style={{ fontSize:12, fontWeight:700, color:C.text }}>{lbl}</div>
+                  <div style={{ fontSize:11, color:C.muted }}>{note}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* SECTION 3 */}
+        <div style={{ marginBottom:36 }}>
+          <Step n="3">What a Converted Client Is Actually Worth</Step>
+          <div style={{ background:C.card, borderRadius:14, padding:"24px 22px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)" }}>
+            <WRow label="Intro session paid"                    value={INTRO}        max={ANNUAL_LTV*2} color={C.gold} />
+            <WRow label="Avg monthly spend (2×/mo at $124)"    value={208}          max={ANNUAL_LTV*2} color={C.greenLight} />
+            <WRow label="Year 1 LTV (conservative)"            value={ANNUAL_LTV}   max={ANNUAL_LTV*2} color={C.green} bold />
+            <WRow label="2-Year LTV"                           value={ANNUAL_LTV*2} max={ANNUAL_LTV*2} color={C.green} bold sub="Loyal clients typically stay 3–5 years" />
+            <div style={{ borderTop:`2px dashed ${C.greenPale}`, marginTop:20, paddingTop:18, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:12 }}>
+              <div>
+                <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.08em", color:C.muted, fontWeight:700 }}>You "gave up"</div>
+                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:700, color:C.accent }}>${RATE-INTRO} per intro</div>
+                <div style={{ fontSize:12, color:C.muted }}>vs. $124 full rate on a slot that was empty anyway</div>
+              </div>
+              <div style={{ fontSize:22, color:C.muted }}>→</div>
+              <div>
+                <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.08em", color:C.muted, fontWeight:700 }}>You earned (if converted)</div>
+                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:700, color:C.green }}>${(ANNUAL_LTV+INTRO).toLocaleString()}+ Year 1</div>
+                <div style={{ fontSize:12, color:C.muted }}>$49 intro + full LTV</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 4 */}
+        <div style={{ marginBottom:36 }}>
+          <Step n="4">Run the Numbers</Step>
+          <div style={{ background:C.card, borderRadius:14, padding:"24px 22px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div style={{ marginBottom:24 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+                <div>
+                  <div style={{ fontSize:14, fontWeight:600, color:C.text }}>Monthly intro sessions from empty slots</div>
+                  <div style={{ fontSize:11, color:C.muted, marginTop:2 }}>You have ~{Math.round(totalEmpty12/12)}h/mo idle — capacity for far more than this slider allows</div>
+                </div>
+                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, fontWeight:700, color:C.green }}>{intro}</div>
+              </div>
+              <input type="range" min={5} max={80} step={5} value={intro} onChange={e => setIntro(Number(e.target.value))} />
+              <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:C.muted, marginTop:6 }}>
+                <span>5 sessions</span><span>80 sessions</span>
+              </div>
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:12 }}>
+              {[
+                { label:"Immediate Revenue",        value:`$${introRev.toLocaleString()}`,    sub:"vs. $0 from empty slots",       color:C.goldLight },
+                { label:"Clients Converted (30%)",  value:converted,                          sub:"conservative estimate",         color:C.greenPale },
+                { label:"New Annual Revenue",        value:`$${annualRev.toLocaleString()}`,   sub:"from converted clients",        color:C.greenPale },
+                { label:"2-Year Pipeline",           value:`$${twoYearRev.toLocaleString()}`,  sub:"from this one month of intros", color:C.greenPale, bold:true },
+              ].map(({ label, value, sub, color, bold }) => (
+                <div key={label} style={{ background:color, borderRadius:10, padding:"16px 14px" }}>
+                  <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:26, fontWeight:700, color:C.green, lineHeight:1, marginBottom:6 }}>{value}</div>
+                  <div style={{ fontSize:12, fontWeight:bold?700:600, color:C.text }}>{label}</div>
+                  <div style={{ fontSize:11, color:C.muted, marginTop:2 }}>{sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* CLOSING */}
+        <div style={{ background:C.green, borderRadius:14, padding:"28px 28px", color:"#fff" }}>
+          <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:C.goldLight, marginBottom:10 }}>The core argument</div>
+          <p style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, lineHeight:1.5, margin:"0 0 14px", fontWeight:600 }}>
+            "Discounting" implies you had a full-price buyer who paid less.<br />
+            An empty slot has no buyer. The $49 intro isn't a discount — it's a new client who didn't exist yet.
+          </p>
+          <p style={{ fontSize:13, color:"rgba(255,255,255,0.75)", margin:0, lineHeight:1.7 }}>
+            Your own data shows over $14,000 in potential revenue going unrealized every month across your team. 
+            Today's wellness consumer expects to try before committing — especially with a new therapist. 
+            A low-friction entry point removes that barrier. Once they're in the room and experience the 
+            quality of your clinic, converting to a long-term client isn't a sales pitch. It's a natural next step.
+          </p>
+        </div>
+
+        <div style={{ marginTop:16, textAlign:"center", fontSize:11, color:C.muted, lineHeight:1.7 }}>
+          Data source: Jane EHR · Hours Scheduled/Booked Report · 12-month &amp; 4-month windows · 4 practitioners<br />
+          Assumptions: 30% intro conversion · 2×/mo visit frequency · $124/session standard rate · $208/mo avg ongoing spend<br />
+          Prepared by Smart Practitioner
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

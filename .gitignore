@@ -1,0 +1,25 @@
+# Private reporting workspace — never commit client data
+reports-workspace/
+
+# Ad-hoc migration scripts (keep local, don't track)
+/apply_rewrites.js
+/apply_uploadcare.js
+/build_policy_pages.js
+/check_images.js
+/check_images.py
+/check_live.js
+/collect_assets.js
+/fix_paths.js
+/fix_typos.js
+/inject_overrides_link.js
+/restore_gtm.js
+/step4_cleanup.js
+/strip_hints.js
+/landingi_migration_manifest.json
+/uploadcare_migration_manifest.json
+
+# Node / OS / editor
+node_modules/
+.DS_Store
+Thumbs.db
+.claude/
