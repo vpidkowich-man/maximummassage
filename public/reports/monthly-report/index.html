@@ -149,6 +149,27 @@ const KPI = ({ label, value, delta, accent, hint }) => {
   );
 };
 
+// --- Section-1 KPI (capacity-report visual idiom: big serif number, pastel bg, optional accent border) ---
+const SectionKPI = ({ label, value, sub, color, accent }) => (
+  <div style={{
+    background: color || C.card, borderRadius: 14, padding: "22px 18px",
+    flex: 1, minWidth: 140, boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+    border: "1px solid rgba(0,0,0,0.06)",
+    borderTop: accent ? `3px solid ${accent}` : undefined,
+  }}>
+    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, fontWeight:700, color:accent||C.green, lineHeight:1, marginBottom:6 }}>{value}</div>
+    <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.04em", textTransform:"uppercase", marginBottom: sub?4:0 }}>{label}</div>
+    {sub && <div style={{ fontSize:11, color:C.muted, lineHeight:1.5 }}>{sub}</div>}
+  </div>
+);
+
+const Step = ({ n, children }) => (
+  <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
+    <div style={{ width:28, height:28, borderRadius:"50%", background:C.green, color:"#fff", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
+    <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:C.text, margin:0 }}>{children}</h2>
+  </div>
+);
+
 // --- Stacked bar tooltip (monthly: completed + cancelled) ---
 const StackTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -302,36 +323,51 @@ function App() {
     };
   }).filter(Boolean);
 
-  // --- Section 1: clinic-wide "real cost of empty hours" KPIs ---
-  // Uses the 12mo utilization window (fixed) for a stable headline summary, regardless
-  // of the user's date range. Lost revenue = (idle + cancelled hrs) × avg $/hr.
-  const clinic12 = data.segments?.["whole-clinic"]?.snapshot?.["12mo"];
+  // --- Section 1: "real cost of empty hours" — segment-driven, 12mo snapshot ---
+  // Matches the capacity report exactly: fill rate = booked/shift (apptHours/shiftHours)
+  // and $124/hr flat rate for lost-revenue math. Cancellation hours will be slightly
+  // higher than the capacity report's hardcoded numbers because this report reads from
+  // the dedicated cancellations export (more complete than the availability file alone).
+  const LIST_RATE = 124;
   const massage12 = data.segments?.["all-massage"]?.snapshot?.["12mo"];
-  const avgRate = (massage12 && massage12.completedHours > 0)
-    ? (() => {
-        // Derive massage $/hr from actual revenue / completed hours over the last 12 months.
-        const range = data.snapshotRanges?.["12mo"];
-        const days = (data.segments["all-massage"].daily || []).filter(d =>
-          range ? d.date >= range.start && d.date <= range.end : true
-        );
-        const rev = days.reduce((s, d) => s + (d.revenue || 0), 0);
-        return rev > 0 && massage12.completedHours > 0 ? rev / massage12.completedHours : 124;
-      })()
-    : 124;
-  const section1 = clinic12 ? {
-    lostRevPerMonth: Math.round(((clinic12.idleHours + clinic12.cancelledHours) * avgRate) / 12),
-    emptyHoursPerMonth: Math.round(clinic12.idleHours / 12),
+  const blendedRate = (() => {
+    if (!massage12 || !massage12.apptHours) return null;
+    const range = data.snapshotRanges?.["12mo"];
+    const days = (data.segments["all-massage"].daily || []).filter(d =>
+      range ? d.date >= range.start && d.date <= range.end : true
+    );
+    const rev = days.reduce((s, d) => s + (d.revenue || 0), 0);
+    return rev > 0 ? rev / massage12.apptHours : null;
+  })();
+  const avgRate = LIST_RATE;
+
+  // Pull the 12mo snapshot for the currently selected segment.
+  const isAggregateSegment = segmentKey === "whole-clinic" || segmentKey === "all-massage";
+  const segmentSnap = isAggregateSegment
+    ? data.segments?.[segmentKey]?.snapshot?.["12mo"]
+    : (data.segments?.[segmentKey]?.snapshot?.["12mo"] || data.practitionerUtilization?.[segmentKey]?.["12mo"]);
+
+  const section1 = segmentSnap && segmentSnap.shiftHours ? {
+    lostRevPerMonth: Math.round(((segmentSnap.idleHours + segmentSnap.cancelledHours) * avgRate) / 12),
+    emptyHoursPerMonth: Math.round(segmentSnap.idleHours / 12),
+    fillRate: segmentSnap.apptHours / segmentSnap.shiftHours,    // booked/shift (matches capacity report)
     avgRate: Math.round(avgRate),
+    segLabel: segment.label || segmentKey,
+    windowStart: segmentSnap.windowStart,
+    windowEnd: segmentSnap.windowEnd,
   } : null;
-  // Lowest fill-rate practitioner (focus or massage), using completedHours / shiftHours
-  const candidates = (data.practitioners?.focus || []);
+
+  // For aggregate views (whole-clinic, all-massage), also compute the weakest focus
+  // therapist so the third card can flag where the biggest upside sits.
   let lowestFillRate = null;
-  for (const name of candidates) {
-    const snap = data.practitionerUtilization?.[name]?.["12mo"];
-    if (!snap || !snap.shiftHours) continue;
-    const rate = snap.completedHours / snap.shiftHours;
-    if (lowestFillRate == null || rate < lowestFillRate.rate) {
-      lowestFillRate = { name, rate, firstName: name.split(" ")[0] };
+  if (isAggregateSegment) {
+    for (const name of (data.practitioners?.focus || [])) {
+      const snap = data.practitionerUtilization?.[name]?.["12mo"];
+      if (!snap || !snap.shiftHours) continue;
+      const rate = snap.apptHours / snap.shiftHours;  // booked/shift
+      if (lowestFillRate == null || rate < lowestFillRate.rate) {
+        lowestFillRate = { name, rate, firstName: name.split(" ")[0] };
+      }
     }
   }
 
@@ -428,46 +464,86 @@ function App() {
           </p>
         </div>
 
-        {/* SECTION 1 — The real cost of empty hours (clinic-wide, last 12 months) */}
-        {section1 && (
-          <Card
-            title="The real cost of empty hours"
-            subtitle={`Clinic-wide, last 12 months — at the massage program's realized rate of ~$${section1.avgRate}/hr`}
-          >
-            <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
-              <KPI
-                label="Lost revenue / month"
-                value={`$${section1.lostRevPerMonth.toLocaleString()}`}
-                delta={null}
-                accent={C.accent}
-                hint="Hours available but unfilled or cancelled × avg $/hr"
-              />
-              <KPI
-                label="Empty hours / month"
-                value={`${section1.emptyHoursPerMonth}h`}
-                delta={null}
-                accent={C.gold}
-                hint="Scheduled capacity never booked (clinic-wide average)"
-              />
-              {lowestFillRate && (
-                <KPI
-                  label={`${lowestFillRate.firstName}'s fill rate`}
-                  value={`${Math.round(lowestFillRate.rate * 100)}%`}
-                  delta={null}
-                  accent={C.green}
-                  hint={`Lowest of the focus therapists — biggest upside if filled`}
-                />
-              )}
-            </div>
-          </Card>
-        )}
-
         {/* KPI ROW — reflects selected date range */}
         <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:28 }}>
           <KPI label="Revenue"        value={fmtMoney(kpis.revenue.cur)}   delta={pct(kpis.revenue.cur,   kpis.revenue.prior)}   accent={C.green} hint={`${fmtDate(dateStart)} – ${fmtDate(dateEnd)}`} />
           <KPI label="Bookings"       value={fmtNum(kpis.completed.cur)}   delta={pct(kpis.completed.cur, kpis.completed.prior)} accent={C.greenLight} hint="Completed = booked − cancelled" />
           <KPI label="Cancellations"  value={fmtNum(kpis.cancelled.cur)}   delta={pct(kpis.cancelled.cur, kpis.cancelled.prior)} accent={C.accent}     hint={cancRate != null ? `${cancRate.toFixed(1)}% cancellation rate` : null} />
         </div>
+
+        {/* SECTION 1 — The real cost of empty hours (segment-driven, 12mo snapshot) */}
+        {/* Styled to match the capacity report so the client sees a consistent visual idiom. */}
+        {section1 && (
+          <div style={{ marginBottom:36 }}>
+            <Step n="1">The Real Cost of Empty Hours</Step>
+            <div style={{ fontSize:12, color:C.muted, marginBottom:14, marginLeft:40 }}>
+              {isAggregateSegment ? section1.segLabel : `${section1.segLabel}'s schedule`}
+              {` · last 12 months (${fmtDate(section1.windowStart)} – ${fmtDate(section1.windowEnd)}) · at the standard $${section1.avgRate}/hr rate`}
+              {blendedRate ? ` · realized blended rate: $${blendedRate.toFixed(0)}/hr` : ""}
+            </div>
+
+            <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:16 }}>
+              <SectionKPI
+                value={`$${section1.lostRevPerMonth.toLocaleString()}`}
+                label="Lost revenue / month"
+                sub="Hours available but unfilled or cancelled — at the massage program's average $/hr"
+                accent={C.accent}
+              />
+              <SectionKPI
+                value={`${section1.emptyHoursPerMonth}h`}
+                label="Empty hours / month"
+                sub={isAggregateSegment ? "Avg across the selected team over 12 months" : "Scheduled capacity never booked"}
+                color={C.goldLight}
+              />
+              {isAggregateSegment && lowestFillRate ? (
+                <SectionKPI
+                  value={`${Math.round(lowestFillRate.rate * 100)}%`}
+                  label={`${lowestFillRate.firstName}'s fill rate`}
+                  sub={`Lowest of the 4 focus therapists — ${100 - Math.round(lowestFillRate.rate * 100)}% of her schedule sits empty every week`}
+                  color={C.greenPale}
+                  accent={C.green}
+                />
+              ) : (
+                <SectionKPI
+                  value={`${Math.round(section1.fillRate * 100)}%`}
+                  label={`${section1.segLabel.split(" ")[0]}'s fill rate`}
+                  sub={`${100 - Math.round(section1.fillRate * 100)}% of her schedule sits empty every week`}
+                  color={C.greenPale}
+                  accent={C.green}
+                />
+              )}
+            </div>
+
+            {/* Per-therapist breakdown cards — only for aggregate views */}
+            {isAggregateSegment && (
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:10 }}>
+                {(data.practitioners?.focus || []).map(name => {
+                  const snap = data.practitionerUtilization?.[name]?.["12mo"];
+                  if (!snap || !snap.shiftHours) return null;
+                  const fillPct = Math.round((snap.apptHours / snap.shiftHours) * 100);
+                  const idlePct = Math.round(((snap.idleHours + snap.cancelledHours) / snap.shiftHours) * 100);
+                  const idleRev = Math.round(((snap.idleHours + snap.cancelledHours) * avgRate) / 12);
+                  const col = fillPct < 35 ? C.accent : fillPct < 55 ? C.gold : C.green;
+                  const first = name.split(" ")[0];
+                  return (
+                    <div key={name} style={{
+                      background: C.card, borderRadius: 10, padding: "14px 16px",
+                      boxShadow: "0 1px 6px rgba(0,0,0,0.05)", borderLeft: `3px solid ${col}`,
+                    }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                        <div style={{ fontSize:14, fontWeight:700, color:C.text }}>{first}</div>
+                        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:col }}>{fillPct}% booked</div>
+                      </div>
+                      <div style={{ fontSize:11, color:C.muted, marginTop:4 }}>
+                        <strong style={{ color:C.text }}>{idlePct}% idle</strong> · ~${idleRev.toLocaleString()}/mo in unrealized revenue
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* STACKED BAR: monthly bookings (completed + cancelled) */}
         <Card title="Monthly Bookings" subtitle="Completed vs. cancelled by month — cancellations sit on top so the lost portion is visible">
