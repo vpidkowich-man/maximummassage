@@ -387,10 +387,12 @@ async function main() {
     snapshot: Object.fromEntries(["1mo","4mo","12mo"].map(k => [k, buildSnapshot(availabilities[k], () => true)])),
   };
 
-  // Preserve order: all-massage, per-therapist (config order), whole-clinic
-  const ordered = { "all-massage": segments["all-massage"] };
+  // Preserve order: whole-clinic, all-massage, per-therapist (config order)
+  const ordered = {
+    "whole-clinic": segments["whole-clinic"],
+    "all-massage": segments["all-massage"],
+  };
   for (const n of focus) ordered[n] = segments[n];
-  ordered["whole-clinic"] = segments["whole-clinic"];
 
   const allMonths = Object.values(ordered).flatMap(s => (s.monthly || []).map(m => m.month));
   const dataThrough = allMonths.length ? allMonths.sort().at(-1) : null;
