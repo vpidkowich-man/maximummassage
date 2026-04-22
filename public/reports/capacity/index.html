@@ -37,18 +37,22 @@ const C = {
   accent: "#C4653A", cancelled: "#C4653A",
 };
 
+// Regenerated 2026-04-22 from the monthly report's data pipeline (scripts/build-monthly-report.mjs)
+// so both reports read the same underlying availability + cancellations exports. Rollback:
+// `git checkout capacity-report-pre-regen-2026-04-22 -- public/reports/capacity/index.html`
+// 4mo window: 2026-01-01 → 2026-04-30. 12mo window: 2025-05-01 → 2026-04-30.
 const DATA = {
   "4mo": [
-    { name: "Brooklyn", booked: 128, cancelled: 16, empty: 196, shift: 324, pct: 40 },
-    { name: "Charlotte", booked: 37,  cancelled: 0,  empty: 165, shift: 203, pct: 18 },
-    { name: "Lindsey",   booked: 81,  cancelled: 23, empty: 75,  shift: 156, pct: 52 },
-    { name: "Meagan",    booked: 37,  cancelled: 11, empty: 18,  shift: 55,  pct: 66 },
+    { name: "Brookelyn", booked: 128, cancelled: 25, empty: 196, shift: 324, pct: 40 },
+    { name: "Charlotte", booked:  37, cancelled: 17, empty: 165, shift: 203, pct: 18 },
+    { name: "Lindsey",   booked:  81, cancelled: 13, empty:  75, shift: 156, pct: 52 },
+    { name: "Meagan",    booked:  37, cancelled: 14, empty:  19, shift:  55, pct: 66 },
   ],
   "12mo": [
-    { name: "Brooklyn", booked: 388, cancelled: 16, empty: 571, shift: 959, pct: 40 },
-    { name: "Charlotte", booked: 117, cancelled: 0,  empty: 411, shift: 528, pct: 22 },
-    { name: "Lindsey",   booked: 353, cancelled: 23, empty: 291, shift: 644, pct: 55 },
-    { name: "Meagan",    booked: 136, cancelled: 11, empty: 82,  shift: 218, pct: 62 },
+    { name: "Brookelyn", booked: 388, cancelled: 64, empty: 571, shift: 959, pct: 40 },
+    { name: "Charlotte", booked: 117, cancelled: 41, empty: 411, shift: 528, pct: 22 },
+    { name: "Lindsey",   booked: 353, cancelled: 46, empty: 291, shift: 644, pct: 55 },
+    { name: "Meagan",    booked: 137, cancelled: 41, empty:  82, shift: 219, pct: 62 },
   ],
 };
 
@@ -162,7 +166,7 @@ function App() {
           <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:16 }}>
             <KPI value={`$${perMonthLost.toLocaleString()}`} label="Lost revenue / month" sub="Hours available but unfilled or cancelled — at your standard rate" accent={C.accent} />
             <KPI value={`${Math.round(totalEmpty12/12)}h`}  label="Empty hours / month"  sub="Avg across all 4 therapists over 12 months" color={C.goldLight} />
-            <KPI value="40%"                                 label="Brooklyn's fill rate"  sub="Lowest of the 4 — 60% of her schedule sits empty every week" color={C.greenPale} accent={C.green} />
+            <KPI value="40%"                                 label="Brookelyn's fill rate"  sub="Lowest of the 4 — 60% of her schedule sits empty every week" color={C.greenPale} accent={C.green} />
           </div>
 
           <div style={{ background:C.card, borderRadius:14, padding:"24px 20px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)" }}>
@@ -208,7 +212,7 @@ function App() {
             <div style={{ marginTop:16, background:"#FDF5EE", borderRadius:10, padding:"12px 16px", borderLeft:`3px solid ${C.accent}` }}>
               <div style={{ fontSize:12, fontWeight:700, color:C.accent, marginBottom:4 }}>The pattern holds across both time windows</div>
               <div style={{ fontSize:12, color:C.muted, lineHeight:1.6 }}>
-                Toggle between the last 4 months and the full year — the numbers barely move. Brooklyn sits at 40% either way. Charlotte at 22%. This isn't a slow season. It's a structural gap that advertising can fill.
+                Toggle between the last 4 months and the full year — the numbers barely move. Brookelyn sits at 40% either way. Charlotte at 22%. This isn't a slow season. It's a structural gap that advertising can fill.
               </div>
             </div>
           </div>
@@ -331,7 +335,7 @@ function App() {
             An empty slot has no buyer. The $49 intro isn't a discount — it's a new client who didn't exist yet.
           </p>
           <p style={{ fontSize:13, color:"rgba(255,255,255,0.75)", margin:0, lineHeight:1.7 }}>
-            Your own data shows over $14,000 in potential revenue going unrealized every month across your team. 
+            Your own data shows nearly $16,000 in potential revenue going unrealized every month across your team. 
             Today's wellness consumer expects to try before committing — especially with a new therapist. 
             A low-friction entry point removes that barrier. Once they're in the room and experience the 
             quality of your clinic, converting to a long-term client isn't a sales pitch. It's a natural next step.
