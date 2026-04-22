@@ -35,6 +35,7 @@ const COLS = {
   },
   cancellations: {
     startAt: "start_at",
+    endAt: "end_at",
     staff: "staff_member_name",
     state: "state",
     treatment: "treatment_name",
@@ -164,6 +165,36 @@ function parseMonth(val) {
   return m ? `${m[1]}-${m[2]}` : null;
 }
 
+function parseDate(val) {
+  if (val == null || val === "") return null;
+  if (val instanceof Date) {
+    const y = val.getFullYear();
+    const mo = String(val.getMonth() + 1).padStart(2, "0");
+    const d = String(val.getDate()).padStart(2, "0");
+    return `${y}-${mo}-${d}`;
+  }
+  const m = String(val).match(/(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
+}
+
+// Parse a "YYYY-MM-DD HH:MM:SS -0600" style datetime to epoch ms. Timezone suffix is stripped
+// (we're only using these for duration, so the shared TZ cancels out).
+function parseDateTime(val) {
+  if (val == null || val === "") return null;
+  if (val instanceof Date) return val.getTime();
+  const s = String(val).replace(/\s*[+-]\d{4}$/, "").replace(" ", "T");
+  const t = Date.parse(s);
+  return Number.isFinite(t) ? t : null;
+}
+
+function cancelHours(row) {
+  const start = parseDateTime(row[COLS.cancellations.startAt]);
+  const end   = parseDateTime(row[COLS.cancellations.endAt]);
+  if (start == null || end == null) return 0;
+  const h = (end - start) / 3600000;
+  return h > 0 && h < 12 ? h : 0;
+}
+
 // --- Practitioner detection + config ---------------------------------------
 
 function detectPractitioners(revenueRows, cancellationRows, availabilities) {
@@ -255,43 +286,55 @@ async function confirmConfig(detected, config) {
 
 // --- Aggregation ------------------------------------------------------------
 
-function buildMonthly(revenueRows, cancellationRows, predicateRevenue, predicateCancellation) {
-  const bucket = {}; // YYYY-MM -> { revenue, completed, cancelled }
-  const get = (m) => (bucket[m] ??= { revenue: 0, completed: 0, cancelled: 0 });
+function buildDaily(revenueRows, cancellationRows, predicateRevenue, predicateCancellation) {
+  const bucket = {}; // YYYY-MM-DD -> { revenue, completed, cancelled }
+  const get = (d) => (bucket[d] ??= { revenue: 0, completed: 0, cancelled: 0 });
 
   for (const r of revenueRows) {
-    const month = parseMonth(r[COLS.revenue.purchaseDate]);
-    if (!month) continue;
+    const day = parseDate(r[COLS.revenue.purchaseDate]);
+    if (!day) continue;
     if (!predicateRevenue(r)) continue;
     const total = Number(r[COLS.revenue.total]) || 0;
-    get(month).revenue += total;
+    get(day).revenue += total;
     const staff = r[COLS.revenue.staff];
     if (staff && typeof staff === "string" && staff.trim() !== "") {
       // Rows with a Staff Member are appointments; rows without (products) are not.
-      get(month).completed += 1;
+      get(day).completed += 1;
     }
   }
   for (const c of cancellationRows) {
-    const month = parseMonth(c[COLS.cancellations.startAt]);
-    if (!month) continue;
+    const day = parseDate(c[COLS.cancellations.startAt]);
+    if (!day) continue;
     if (c[COLS.cancellations.state] !== "cancelled") continue;
     if (!predicateCancellation(c)) continue;
-    get(month).cancelled += 1;
+    get(day).cancelled += 1;
   }
 
-  return Object.keys(bucket).sort().map(m => ({
-    month: m,
-    revenue: Math.round(bucket[m].revenue * 100) / 100,
-    completed: bucket[m].completed,
-    cancelled: bucket[m].cancelled,
-    booked: bucket[m].completed + bucket[m].cancelled,
+  return Object.keys(bucket).sort().map(d => ({
+    date: d,
+    revenue: Math.round(bucket[d].revenue * 100) / 100,
+    completed: bucket[d].completed,
+    cancelled: bucket[d].cancelled,
+    booked: bucket[d].completed + bucket[d].cancelled,
   }));
 }
 
-function buildSnapshot(file, staffPredicate) {
+// Derive the date range that a snapshot window covers, inferred from `dataThrough` ("YYYY-MM").
+// Used to scope cancelled-hours counts to the same window the availability export implies.
+function snapshotWindowRange(dataThrough, months) {
+  const [y, m] = dataThrough.split("-").map(Number);
+  const lastDay = new Date(y, m, 0).getDate(); // last day of month m
+  const endDate = `${dataThrough}-${String(lastDay).padStart(2, "0")}`;
+  let sy = y, sm = m - months + 1;
+  while (sm < 1) { sm += 12; sy -= 1; }
+  const startDate = `${sy}-${String(sm).padStart(2, "0")}-01`;
+  return { start: startDate, end: endDate };
+}
+
+function buildSnapshot(file, cancellationRows, staffPredicate, dateStart, dateEnd) {
   if (!file) return null;
   const rows = readSheet(file.path);
-  let shift = 0, brk = 0, appt = 0, apptCount = 0, matched = 0;
+  let shift = 0, appt = 0, apptCount = 0, matched = 0;
   for (const r of rows) {
     const staff = r[COLS.availability.staff];
     if (!staff || typeof staff !== "string") continue;
@@ -299,20 +342,38 @@ function buildSnapshot(file, staffPredicate) {
     if (!staffPredicate(name)) continue;
     matched += 1;
     shift += Number(r[COLS.availability.shiftHours])   || 0;
-    brk   += Number(r[COLS.availability.breakHours])   || 0;
     appt  += Number(r[COLS.availability.apptHours])    || 0;
     apptCount += Number(r[COLS.availability.apptCount]) || 0;
   }
   if (matched === 0) return null;
-  // EHR's "Break" column in this export isn't lunch breaks — for some practitioners
-  // it's larger than (shift - appt), which would make shift-minus-breaks nonsense.
-  // Treat shift hours as the total available capacity; idle = shift - appt.
-  const idle = Math.max(0, shift - appt);
+
+  // Sum cancelled hours from the cancellations file within the same date window.
+  let cancHours = 0, cancCount = 0;
+  for (const c of cancellationRows) {
+    if (c[COLS.cancellations.state] !== "cancelled") continue;
+    const staff = c[COLS.cancellations.staff];
+    if (!staff || typeof staff !== "string" || !staffPredicate(staff.trim())) continue;
+    const d = parseDate(c[COLS.cancellations.startAt]);
+    if (!d || d < dateStart || d > dateEnd) continue;
+    cancHours += cancelHours(c);
+    cancCount += 1;
+  }
+
+  // Treat shift hours as total available capacity (see memory: EHR Break column is unreliable).
+  // apptHours from the availability export includes both attended + cancelled bookings;
+  // break out cancelled separately so the bucket chart can stack completed + cancelled + idle.
+  const idleHours = Math.max(0, shift - appt);
+  const completedHours = Math.max(0, appt - cancHours);
   return {
     shiftHours: round1(shift),
     apptHours: round1(appt),
-    idleHours: round1(idle),
+    completedHours: round1(completedHours),
+    cancelledHours: round1(cancHours),
+    idleHours: round1(idleHours),
     apptCount,
+    cancelledCount: cancCount,
+    windowStart: dateStart,
+    windowEnd: dateEnd,
   };
 }
 
@@ -350,41 +411,60 @@ async function main() {
   const focus = config.focus || [];
   const disc  = new Set(config.inDiscipline || []);
 
+  // Derive dataThrough (YYYY-MM) from the latest revenue/cancellation date so the
+  // snapshot window date ranges can be inferred before we build snapshots.
+  const allDates = [
+    ...revenue.map(r => parseDate(r[COLS.revenue.purchaseDate])).filter(Boolean),
+    ...cancellations.map(c => parseDate(c[COLS.cancellations.startAt])).filter(Boolean),
+  ].sort();
+  const lastDate = allDates.at(-1) || null;
+  const dataThrough = lastDate ? lastDate.slice(0, 7) : null;
+
+  const snapshotRanges = dataThrough ? {
+    "1mo":  snapshotWindowRange(dataThrough, 1),
+    "4mo":  snapshotWindowRange(dataThrough, 4),
+    "12mo": snapshotWindowRange(dataThrough, 12),
+  } : { "1mo": null, "4mo": null, "12mo": null };
+
+  const buildAllSnapshots = (pred) => Object.fromEntries(
+    ["1mo","4mo","12mo"].map(k => {
+      const range = snapshotRanges[k];
+      if (!range) return [k, null];
+      return [k, buildSnapshot(availabilities[k], cancellations, pred, range.start, range.end)];
+    })
+  );
+
   const segments = {};
 
   // All massage: in-discipline practitioners only
   segments["all-massage"] = {
     label: "All Massage",
-    monthly: buildMonthly(
+    daily: buildDaily(
       revenue, cancellations,
       (r) => { const s = r[COLS.revenue.staff]; return typeof s === "string" && disc.has(s.trim()); },
       (c) => { const s = c[COLS.cancellations.staff]; return typeof s === "string" && disc.has(s.trim()); },
     ),
-    snapshot: Object.fromEntries(["1mo","4mo","12mo"].map(k => [k, buildSnapshot(availabilities[k], (s) => disc.has(s))])),
+    snapshot: buildAllSnapshots((s) => disc.has(s)),
   };
 
   // Per focus practitioner
   for (const name of focus) {
     segments[name] = {
       label: name,
-      monthly: buildMonthly(
+      daily: buildDaily(
         revenue, cancellations,
         (r) => { const s = r[COLS.revenue.staff]; return typeof s === "string" && s.trim() === name; },
         (c) => { const s = c[COLS.cancellations.staff]; return typeof s === "string" && s.trim() === name; },
       ),
-      snapshot: Object.fromEntries(["1mo","4mo","12mo"].map(k => [k, buildSnapshot(availabilities[k], (s) => s === name)])),
+      snapshot: buildAllSnapshots((s) => s === name),
     };
   }
 
   // Whole clinic: everything (including product rows for revenue)
   segments["whole-clinic"] = {
     label: "Whole Clinic",
-    monthly: buildMonthly(
-      revenue, cancellations,
-      () => true,
-      () => true,
-    ),
-    snapshot: Object.fromEntries(["1mo","4mo","12mo"].map(k => [k, buildSnapshot(availabilities[k], () => true)])),
+    daily: buildDaily(revenue, cancellations, () => true, () => true),
+    snapshot: buildAllSnapshots(() => true),
   };
 
   // Preserve order: whole-clinic, all-massage, per-therapist (config order)
@@ -394,12 +474,18 @@ async function main() {
   };
   for (const n of focus) ordered[n] = segments[n];
 
-  const allMonths = Object.values(ordered).flatMap(s => (s.monthly || []).map(m => m.month));
-  const dataThrough = allMonths.length ? allMonths.sort().at(-1) : null;
+  // Per-practitioner utilization for the pill-selector bucket chart — includes EVERY
+  // practitioner detected (not just focus). Lets the UI toggle any staff member into
+  // the utilization comparison without bloating the side-rail segment list.
+  const practitionerUtilization = Object.fromEntries(
+    detected.map(name => [name, buildAllSnapshots((s) => s === name)])
+  );
 
   const out = {
     updatedAt: new Date().toISOString(),
     dataThrough,
+    lastDataDate: lastDate,
+    snapshotRanges,
     practitioners: {
       all: detected,
       focus: config.focus,
@@ -413,6 +499,7 @@ async function main() {
       ),
     },
     segments: ordered,
+    practitionerUtilization,
   };
 
   writeFileSync(OUT_PATH, JSON.stringify(out, null, 2) + "\n");

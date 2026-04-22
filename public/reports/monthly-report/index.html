@@ -19,9 +19,14 @@
   th, td { text-align: left; padding: 8px 10px; font-size: 12px; }
 
   .rail {
-    position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
-    padding: 32px 18px 24px; background: #FFFFFF;
-    border-right: 1px solid #E8E1D6; overflow-y: auto; z-index: 20;
+    position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+    padding: 28px 16px 24px 20px; background: transparent;
+    overflow-y: auto; z-index: 20;
+  }
+  .rail-inner {
+    background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(8px);
+    border: 1px solid #E8E1D6; border-radius: 14px;
+    padding: 22px 18px; box-shadow: 0 4px 24px rgba(45, 82, 66, 0.08);
   }
   .rail-brand {
     font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700;
@@ -51,20 +56,41 @@
   .rail-window-label { font-size: 11px; color: #1A1A1A; font-weight: 600; flex: 1; text-align: center; }
   .rail-prior { font-size: 10px; color: #6B6459; margin-top: 6px; line-height: 1.4; }
 
-  .report-content { margin-left: 220px; padding: 40px 20px; }
-  .report-content-inner { max-width: 860px; margin: 0 auto; }
+  .report-content { margin-left: 240px; padding: 40px 28px; }
+  .report-content-inner { max-width: 920px; margin: 0 auto; }
+
+  .date-input {
+    display: block; width: 100%; padding: 7px 10px; margin-bottom: 8px;
+    border-radius: 8px; border: 1px solid #E8E1D6; background: #FFFFFF;
+    font-family: inherit; font-size: 12px; color: #1A1A1A; cursor: pointer;
+  }
+  .date-input:focus { outline: none; border-color: #2D5242; }
+  .date-label { font-size: 10px; font-weight: 600; color: #6B6459; margin-bottom: 3px; }
+
+  .pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .pill {
+    padding: 5px 11px; border-radius: 16px; font-size: 11px; font-weight: 600;
+    border: 1px solid transparent; background: #EDE9E3; color: #6B6459;
+    transition: all 0.12s;
+  }
+  .pill:hover { background: #E0DACE; color: #1A1A1A; }
+  .pill-active { background: #2D5242; color: #FFFFFF; border-color: #2D5242; }
+  .pill-active:hover { background: #2D5242; color: #FFFFFF; }
+
+  .chart-title { font-size: 20px; font-weight: 700; color: #1A1A1A; font-family: 'Cormorant Garamond', serif; }
+  .chart-subtitle { font-size: 12px; color: #6B6459; margin-top: 4px; line-height: 1.5; }
 
   @media (max-width: 900px) {
     .rail {
       position: static; width: auto; height: auto;
-      border-right: none; border-bottom: 1px solid #E8E1D6;
-      padding: 16px 20px; overflow-y: visible;
+      padding: 12px 16px; overflow-y: visible;
     }
+    .rail-inner { padding: 14px 16px; }
     .rail-brand { display: inline-block; margin-right: 16px; }
-    .rail-brand-sub { display: inline-block; margin-bottom: 16px; }
+    .rail-brand-sub { display: inline-block; margin-bottom: 10px; }
     .rail-section { margin-bottom: 14px; }
     .rail-btn { display: inline-block; width: auto; margin-right: 4px; }
-    .report-content { margin-left: 0; padding: 24px 20px; }
+    .report-content { margin-left: 0; padding: 20px 16px; }
   }
 </style>
 </head>
@@ -140,17 +166,21 @@ const StackTooltip = ({ active, payload, label }) => {
   );
 };
 
-// --- Utilization bucket tooltip (per-therapist: booked% + idle% + raw hours) ---
+// --- Utilization bucket tooltip (per-therapist: completed% + cancelled% + idle% + raw hours) ---
 const UtilTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   const p = payload[0]?.payload;
   if (!p) return null;
   return (
-    <div style={{ background:C.green, color:"#fff", borderRadius:10, padding:"12px 16px", fontSize:12, boxShadow:"0 4px 20px rgba(0,0,0,0.25)", minWidth:200 }}>
+    <div style={{ background:C.green, color:"#fff", borderRadius:10, padding:"12px 16px", fontSize:12, boxShadow:"0 4px 20px rgba(0,0,0,0.25)", minWidth:220 }}>
       <div style={{ fontWeight:700, marginBottom:8 }}>{p.fullName || p.name}</div>
       <div style={{ display:"flex", justifyContent:"space-between", gap:16, marginBottom:3 }}>
-        <span style={{ color:"#a8d4bc" }}>✓ Booked</span>
-        <span style={{ fontWeight:700 }}>{p.bookedPct}% · {p.apptHours?.toFixed(0)}h</span>
+        <span style={{ color:"#a8d4bc" }}>✓ Completed</span>
+        <span style={{ fontWeight:700 }}>{p.completedPct}% · {p.completedHours?.toFixed(0)}h</span>
+      </div>
+      <div style={{ display:"flex", justifyContent:"space-between", gap:16, marginBottom:3 }}>
+        <span style={{ color:"#e8b499" }}>✗ Cancelled</span>
+        <span style={{ fontWeight:700 }}>{p.cancelledPct}% · {p.cancelledHours?.toFixed(0)}h</span>
       </div>
       <div style={{ display:"flex", justifyContent:"space-between", gap:16, marginBottom:3 }}>
         <span style={{ color:"#c8bfb5" }}>○ Idle</span>
@@ -184,8 +214,10 @@ function App() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [segmentKey, setSegmentKey] = useState(null);
-  const [windowEnd, setWindowEnd] = useState(null); // YYYY-MM — last month of 6-month window
+  const [dateStart, setDateStart] = useState(null); // YYYY-MM-DD
+  const [dateEnd, setDateEnd]     = useState(null); // YYYY-MM-DD
   const [snapshotKey, setSnapshotKey] = useState("12mo");
+  const [activePractitioners, setActivePractitioners] = useState(null); // Set<string> of practitioners in util chart
 
   useEffect(() => {
     fetch("./data.json", { cache: "no-store" })
@@ -194,7 +226,23 @@ function App() {
         setData(d);
         const firstSeg = Object.keys(d.segments || {})[0];
         if (firstSeg) setSegmentKey(firstSeg);
-        if (d.dataThrough) setWindowEnd(d.dataThrough);
+        // Default date window: last 6 months ending on the latest data date.
+        if (d.lastDataDate) {
+          const end = d.lastDataDate;
+          const [y, m] = end.split("-").map(Number);
+          let sy = y, sm = m - 5;
+          while (sm < 1) { sm += 12; sy -= 1; }
+          const start = `${sy}-${String(sm).padStart(2,"0")}-01`;
+          setDateStart(start);
+          setDateEnd(end);
+        } else if (d.dataThrough) {
+          const end = `${d.dataThrough}-28`;
+          setDateEnd(end);
+          setDateStart(`${shiftYear(d.dataThrough, 0).split("-")[0]}-01-01`);
+        }
+        // Utilization chart: default to focus practitioners selected.
+        const focus = d.practitioners?.focus || [];
+        setActivePractitioners(new Set(focus));
       })
       .catch(e => setError(e.message));
   }, []);
@@ -206,17 +254,15 @@ function App() {
   const segment = data.segments[segmentKey];
   if (!segment) return <LoadingState />;
 
-  // Build the 6-month window and same window prior year
-  const allMonths = (segment.monthly || []).map(m => m.month).sort();
-  const effectiveEnd = windowEnd || allMonths[allMonths.length - 1];
-  const { windowMonths, priorMonths, windowRows, priorRows } = buildWindows(segment.monthly, effectiveEnd);
+  // Filter daily data to picked date range, roll up to monthly for charts/tables
+  const { windowMonths, priorMonths, windowRows, priorRows } = buildRange(segment.daily, dateStart, dateEnd);
 
   // Aggregate KPIs
   const sum = (rows, k) => rows.reduce((s, r) => s + (r?.[k] || 0), 0);
   const kpis = {
-    revenue:       { cur: sum(windowRows, "revenue"),    prior: priorRows.length ? sum(priorRows, "revenue")    : null },
-    completed:     { cur: sum(windowRows, "completed"),  prior: priorRows.length ? sum(priorRows, "completed")  : null },
-    cancelled:     { cur: sum(windowRows, "cancelled"),  prior: priorRows.length ? sum(priorRows, "cancelled")  : null },
+    revenue:   { cur: sum(windowRows, "revenue"),    prior: priorRows.length ? sum(priorRows, "revenue")    : null },
+    completed: { cur: sum(windowRows, "completed"),  prior: priorRows.length ? sum(priorRows, "completed")  : null },
+    cancelled: { cur: sum(windowRows, "cancelled"),  prior: priorRows.length ? sum(priorRows, "cancelled")  : null },
   };
   const booked = sum(windowRows, "booked");
   const cancRate = booked > 0 ? (kpis.cancelled.cur / booked) * 100 : null;
@@ -228,34 +274,66 @@ function App() {
     cancelled: windowRows[i]?.cancelled || 0,
   }));
 
-  // Bucket-style utilization chart: one vertical stacked bar per focus practitioner,
-  // showing Booked % (green) + Idle % (grey), matching capacity-report.html visual idiom.
-  // Always shows focus practitioners regardless of which segment tab is active.
-  const focusNames = (data.practitioners?.focus || []);
-  const utilChartData = focusNames.map(name => {
-    const seg = data.segments[name];
-    const snap = seg?.snapshot?.[snapshotKey];
+  // --- Schedule Utilization bucket chart (3-layer: completed + cancelled + idle) ---
+  // Uses `practitionerUtilization` at the data root (all detected practitioners) and a
+  // pill selector to toggle bars in/out. Defaults to focus practitioners.
+  const allPractitioners = Object.keys(data.practitionerUtilization || {}).sort();
+  const activeSet = activePractitioners || new Set(data.practitioners?.focus || []);
+  const snapshotAvailable = ["1mo", "4mo", "12mo"].filter(k => {
+    return allPractitioners.some(n => data.practitionerUtilization[n]?.[k]);
+  });
+
+  const utilChartData = allPractitioners.filter(n => activeSet.has(n)).map(name => {
+    const snap = data.practitionerUtilization?.[name]?.[snapshotKey];
     if (!snap || !snap.shiftHours) return null;
-    const bookedPct = Math.round((snap.apptHours / snap.shiftHours) * 100);
-    const idlePct = Math.max(0, 100 - bookedPct);
+    const completedPct = Math.round((snap.completedHours / snap.shiftHours) * 100);
+    const cancelledPct = Math.round((snap.cancelledHours / snap.shiftHours) * 100);
+    const idlePct = Math.max(0, 100 - completedPct - cancelledPct);
     return {
       name: name.split(" ")[0],
       fullName: name,
-      bookedPct,
+      completedPct,
+      cancelledPct,
       idlePct,
       shiftHours: snap.shiftHours,
-      apptHours: snap.apptHours,
+      completedHours: snap.completedHours,
+      cancelledHours: snap.cancelledHours,
       idleHours: snap.idleHours,
     };
   }).filter(Boolean);
-  const snapshotAvailable = (() => {
-    const keys = new Set();
-    focusNames.forEach(n => {
-      const snap = data.segments[n]?.snapshot;
-      if (snap) Object.keys(snap).forEach(k => snap[k] && keys.add(k));
-    });
-    return Array.from(keys);
-  })();
+
+  // --- Section 1: clinic-wide "real cost of empty hours" KPIs ---
+  // Uses the 12mo utilization window (fixed) for a stable headline summary, regardless
+  // of the user's date range. Lost revenue = (idle + cancelled hrs) × avg $/hr.
+  const clinic12 = data.segments?.["whole-clinic"]?.snapshot?.["12mo"];
+  const massage12 = data.segments?.["all-massage"]?.snapshot?.["12mo"];
+  const avgRate = (massage12 && massage12.completedHours > 0)
+    ? (() => {
+        // Derive massage $/hr from actual revenue / completed hours over the last 12 months.
+        const range = data.snapshotRanges?.["12mo"];
+        const days = (data.segments["all-massage"].daily || []).filter(d =>
+          range ? d.date >= range.start && d.date <= range.end : true
+        );
+        const rev = days.reduce((s, d) => s + (d.revenue || 0), 0);
+        return rev > 0 && massage12.completedHours > 0 ? rev / massage12.completedHours : 124;
+      })()
+    : 124;
+  const section1 = clinic12 ? {
+    lostRevPerMonth: Math.round(((clinic12.idleHours + clinic12.cancelledHours) * avgRate) / 12),
+    emptyHoursPerMonth: Math.round(clinic12.idleHours / 12),
+    avgRate: Math.round(avgRate),
+  } : null;
+  // Lowest fill-rate practitioner (focus or massage), using completedHours / shiftHours
+  const candidates = (data.practitioners?.focus || []);
+  let lowestFillRate = null;
+  for (const name of candidates) {
+    const snap = data.practitionerUtilization?.[name]?.["12mo"];
+    if (!snap || !snap.shiftHours) continue;
+    const rate = snap.completedHours / snap.shiftHours;
+    if (lowestFillRate == null || rate < lowestFillRate.rate) {
+      lowestFillRate = { name, rate, firstName: name.split(" ")[0] };
+    }
+  }
 
   // YoY line charts (revenue, bookings, cancellations) — current solid, prior dashed gold
   const revChart = windowMonths.map((m, i) => ({
@@ -274,42 +352,63 @@ function App() {
     prior:   priorRows[i]?.cancelled ?? null,
   }));
 
-  // Window nav
-  const canShiftBack = allMonths.indexOf(windowMonths[0]) > 0;
-  const canShiftForward = allMonths.indexOf(windowMonths[windowMonths.length-1]) < allMonths.length - 1;
+  const togglePractitioner = (name) => {
+    const next = new Set(activeSet);
+    if (next.has(name)) next.delete(name); else next.add(name);
+    setActivePractitioners(next);
+  };
+
+  // Date inputs are bounded by the full range of available daily data.
+  const allDates = (segment.daily || []).map(d => d.date);
+  const minDate = allDates[0];
+  const maxDate = allDates[allDates.length - 1];
 
   return (
     <div style={{ background:C.bg, minHeight:"100vh" }}>
 
-      {/* LEFT RAIL — segment (practitioner) selector + window (time frame) picker */}
+      {/* LEFT RAIL — floating card: segment selector + date range picker */}
       <nav className="rail">
-        <div className="rail-brand">Monthly Report</div>
-        <div className="rail-brand-sub">Maximum Massage</div>
+        <div className="rail-inner">
+          <div className="rail-brand">Monthly Report</div>
+          <div className="rail-brand-sub">Maximum Massage</div>
 
-        <div className="rail-section">
-          <div className="rail-label">View</div>
-          {Object.entries(data.segments).map(([k, s]) => (
-            <button
-              key={k}
-              onClick={() => setSegmentKey(k)}
-              className={`rail-btn${segmentKey===k ? " rail-btn-active" : ""}`}
-            >
-              {s.label || k}
-            </button>
-          ))}
-        </div>
-
-        <div className="rail-section">
-          <div className="rail-label">6-month window</div>
-          <div className="rail-window">
-            <button disabled={!canShiftBack} onClick={() => setWindowEnd(shiftMonth(windowMonths[windowMonths.length-1], -1))} style={navBtn(!canShiftBack)}>◀</button>
-            <span className="rail-window-label">
-              {windowMonths.length ? `${monthLabel(windowMonths[0])} – ${monthLabel(windowMonths[windowMonths.length-1])}` : "—"}
-            </span>
-            <button disabled={!canShiftForward} onClick={() => setWindowEnd(shiftMonth(windowMonths[windowMonths.length-1], +1))} style={navBtn(!canShiftForward)}>▶</button>
+          <div className="rail-section">
+            <div className="rail-label">View</div>
+            {Object.entries(data.segments).map(([k, s]) => (
+              <button
+                key={k}
+                onClick={() => setSegmentKey(k)}
+                className={`rail-btn${segmentKey===k ? " rail-btn-active" : ""}`}
+              >
+                {s.label || k}
+              </button>
+            ))}
           </div>
-          <div className="rail-prior">
-            vs. {priorMonths.length ? `${monthLabel(priorMonths[0])} – ${monthLabel(priorMonths[priorMonths.length-1])}` : "no prior-year data"}
+
+          <div className="rail-section">
+            <div className="rail-label">Date range</div>
+            <div className="date-label">Start</div>
+            <input
+              type="date"
+              className="date-input"
+              value={dateStart || ""}
+              min={minDate}
+              max={dateEnd || maxDate}
+              onChange={e => setDateStart(e.target.value)}
+            />
+            <div className="date-label">End</div>
+            <input
+              type="date"
+              className="date-input"
+              value={dateEnd || ""}
+              min={dateStart || minDate}
+              max={maxDate}
+              onChange={e => setDateEnd(e.target.value)}
+            />
+            <div className="rail-prior">
+              Current: {fmtDate(dateStart)} – {fmtDate(dateEnd)}<br/>
+              vs. {dateStart && dateEnd ? `${fmtDate(shiftDateYear(dateStart, -1))} – ${fmtDate(shiftDateYear(dateEnd, -1))}` : "no prior-year data"}
+            </div>
           </div>
         </div>
       </nav>
@@ -329,11 +428,45 @@ function App() {
           </p>
         </div>
 
-        {/* KPI ROW */}
+        {/* SECTION 1 — The real cost of empty hours (clinic-wide, last 12 months) */}
+        {section1 && (
+          <Card
+            title="The real cost of empty hours"
+            subtitle={`Clinic-wide, last 12 months — at the massage program's realized rate of ~$${section1.avgRate}/hr`}
+          >
+            <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+              <KPI
+                label="Lost revenue / month"
+                value={`$${section1.lostRevPerMonth.toLocaleString()}`}
+                delta={null}
+                accent={C.accent}
+                hint="Hours available but unfilled or cancelled × avg $/hr"
+              />
+              <KPI
+                label="Empty hours / month"
+                value={`${section1.emptyHoursPerMonth}h`}
+                delta={null}
+                accent={C.gold}
+                hint="Scheduled capacity never booked (clinic-wide average)"
+              />
+              {lowestFillRate && (
+                <KPI
+                  label={`${lowestFillRate.firstName}'s fill rate`}
+                  value={`${Math.round(lowestFillRate.rate * 100)}%`}
+                  delta={null}
+                  accent={C.green}
+                  hint={`Lowest of the focus therapists — biggest upside if filled`}
+                />
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* KPI ROW — reflects selected date range */}
         <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:28 }}>
-          <KPI label="Revenue (6 mo)"    value={fmtMoney(kpis.revenue.cur)}   delta={pct(kpis.revenue.cur,   kpis.revenue.prior)}   accent={C.green} />
-          <KPI label="Bookings (6 mo)"   value={fmtNum(kpis.completed.cur)}   delta={pct(kpis.completed.cur, kpis.completed.prior)} accent={C.greenLight} hint="Completed = booked − cancelled" />
-          <KPI label="Cancellations (6 mo)" value={fmtNum(kpis.cancelled.cur)} delta={pct(kpis.cancelled.cur, kpis.cancelled.prior)} accent={C.accent} hint={cancRate != null ? `${cancRate.toFixed(1)}% cancellation rate` : null} />
+          <KPI label="Revenue"        value={fmtMoney(kpis.revenue.cur)}   delta={pct(kpis.revenue.cur,   kpis.revenue.prior)}   accent={C.green} hint={`${fmtDate(dateStart)} – ${fmtDate(dateEnd)}`} />
+          <KPI label="Bookings"       value={fmtNum(kpis.completed.cur)}   delta={pct(kpis.completed.cur, kpis.completed.prior)} accent={C.greenLight} hint="Completed = booked − cancelled" />
+          <KPI label="Cancellations"  value={fmtNum(kpis.cancelled.cur)}   delta={pct(kpis.cancelled.cur, kpis.cancelled.prior)} accent={C.accent}     hint={cancRate != null ? `${cancRate.toFixed(1)}% cancellation rate` : null} />
         </div>
 
         {/* STACKED BAR: monthly bookings (completed + cancelled) */}
@@ -351,11 +484,11 @@ function App() {
           <Legend2Layer />
         </Card>
 
-        {/* SCHEDULE UTILIZATION — bucket-style per focus therapist */}
-        {snapshotAvailable.length > 0 && (
+        {/* SCHEDULE UTILIZATION — three-layer bucket per therapist; toggle any practitioner on/off */}
+        {allPractitioners.length > 0 && (
           <Card
             title="Schedule Utilization by Therapist"
-            subtitle="Booked vs. idle as % of scheduled capacity. Each bar is one therapist's bucket — the green fill shows how full the schedule gets."
+            subtitle="Completed, cancelled, and idle as % of scheduled capacity. Toggle any practitioner in the clinic on or off."
           >
             <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap" }}>
               {["1mo","4mo","12mo"].filter(k => snapshotAvailable.includes(k)).map(k => (
@@ -366,16 +499,38 @@ function App() {
                 }}>{SNAPSHOT_LABELS[k]}</button>
               ))}
             </div>
+
+            {/* Practitioner pill selector */}
+            <div className="pill-row">
+              {allPractitioners.map(n => {
+                const active = activeSet.has(n);
+                const short = n.split(" ")[0];
+                return (
+                  <button
+                    key={n}
+                    className={`pill${active ? " pill-active" : ""}`}
+                    onClick={() => togglePractitioner(n)}
+                    title={n}
+                  >
+                    {active ? "✓ " : "+ "}{short}
+                  </button>
+                );
+              })}
+            </div>
+
             {utilChartData.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={260}>
+                <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={utilChartData} margin={{ top:14, right:10, left:-15, bottom:0 }} barSize={52}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize:13, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
                     <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize:11, fill:C.muted }} domain={[0,100]} axisLine={false} tickLine={false} />
                     <Tooltip content={<UtilTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
-                    <Bar dataKey="bookedPct" stackId="u" fill={C.green} name="Booked">
-                      <LabelList dataKey="bookedPct" position="center" formatter={v => v > 6 ? `${v}%` : ""} style={{ fill:"#fff", fontSize:11, fontWeight:700 }} />
+                    <Bar dataKey="completedPct" stackId="u" fill={C.green} name="Completed">
+                      <LabelList dataKey="completedPct" position="center" formatter={v => v > 6 ? `${v}%` : ""} style={{ fill:"#fff", fontSize:11, fontWeight:700 }} />
+                    </Bar>
+                    <Bar dataKey="cancelledPct" stackId="u" fill={C.cancelled} name="Cancelled">
+                      <LabelList dataKey="cancelledPct" position="center" formatter={v => v > 4 ? `${v}%` : ""} style={{ fill:"#fff", fontSize:10, fontWeight:700 }} />
                     </Bar>
                     <Bar dataKey="idlePct" stackId="u" fill={C.empty} name="Idle" radius={[6,6,0,0]}>
                       <LabelList dataKey="idlePct" position="top" formatter={v => v > 5 ? `${v}% idle` : ""} style={{ fill:C.muted, fontSize:11, fontWeight:700 }} />
@@ -383,18 +538,18 @@ function App() {
                   </BarChart>
                 </ResponsiveContainer>
                 <div style={{ display:"flex", gap:16, marginTop:10, justifyContent:"center", flexWrap:"wrap" }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                    <div style={{ width:10, height:10, borderRadius:2, background:C.green }} />
-                    <span style={{ fontSize:11, color:C.muted }}>Booked (utilization)</span>
-                  </div>
-                  <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                    <div style={{ width:10, height:10, borderRadius:2, background:C.empty }} />
-                    <span style={{ fontSize:11, color:C.muted }}>Idle capacity</span>
-                  </div>
+                  {[[C.green,"Completed"],[C.cancelled,"Cancelled"],[C.empty,"Idle capacity"]].map(([col,lbl]) => (
+                    <div key={lbl} style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <div style={{ width:10, height:10, borderRadius:2, background:col }} />
+                      <span style={{ fontSize:11, color:C.muted }}>{lbl}</span>
+                    </div>
+                  ))}
                 </div>
               </>
             ) : (
-              <div style={{ fontSize:12, color:C.muted }}>No snapshot data for this window.</div>
+              <div style={{ fontSize:12, color:C.muted, padding:"24px 0", textAlign:"center" }}>
+                Select at least one practitioner above to show their utilization.
+              </div>
             )}
           </Card>
         )}
@@ -488,49 +643,78 @@ function App() {
 
 // --- Helpers ---
 
-// Build a 6-month window ending at `end`, and same 6 months prior year
-function buildWindows(monthly, end) {
-  if (!monthly || !monthly.length || !end) return { windowMonths:[], priorMonths:[], windowRows:[], priorRows:[] };
-  const byMonth = Object.fromEntries(monthly.map(r => [r.month, r]));
-  const windowMonths = [];
-  let [y, m] = end.split("-").map(Number);
-  for (let i = 0; i < 6; i++) {
-    const mo = `${y}-${String(m).padStart(2, "0")}`;
-    windowMonths.unshift(mo);
-    m -= 1; if (m === 0) { m = 12; y -= 1; }
-  }
-  const priorMonths = windowMonths.map(mo => shiftYear(mo, -1));
-  const windowRows = windowMonths.map(mo => byMonth[mo] || null);
-  const hasAnyPrior = priorMonths.some(mo => byMonth[mo]);
-  const priorRows = hasAnyPrior ? priorMonths.map(mo => byMonth[mo] || null) : [];
-  return { windowMonths, priorMonths, windowRows, priorRows };
-}
+// Filter daily rows to [dateStart, dateEnd] inclusive; also returns prior-year equivalents
+// (both endpoints shifted back 1 year) and monthly roll-ups for charts/table.
+function buildRange(daily, dateStart, dateEnd) {
+  const empty = { windowMonths:[], priorMonths:[], windowRows:[], priorRows:[], currentDaily:[], priorDaily:[] };
+  if (!daily || !daily.length || !dateStart || !dateEnd) return empty;
 
-function shiftMonth(ym, delta) {
-  let [y, m] = ym.split("-").map(Number);
-  m += delta;
-  while (m < 1) { m += 12; y -= 1; }
-  while (m > 12) { m -= 12; y += 1; }
-  return `${y}-${String(m).padStart(2,"0")}`;
-}
+  const inRange = (d, s, e) => d >= s && d <= e;
+  const currentDaily = daily.filter(d => inRange(d.date, dateStart, dateEnd));
 
-function navBtn(disabled) {
-  return {
-    width:28, height:28, borderRadius:6,
-    background: disabled ? "#EDE9E3" : C.green,
-    color: disabled ? C.muted : "#fff",
-    fontSize:11, fontWeight:700,
-    opacity: disabled ? 0.5 : 1,
-    cursor: disabled ? "not-allowed" : "pointer",
+  const priorStart = shiftDateYear(dateStart, -1);
+  const priorEnd   = shiftDateYear(dateEnd,   -1);
+  const priorDaily = daily.filter(d => inRange(d.date, priorStart, priorEnd));
+
+  const aggToMonths = (rows) => {
+    const byMonth = {};
+    for (const r of rows) {
+      const month = r.date.slice(0, 7);
+      byMonth[month] ??= { month, revenue: 0, completed: 0, cancelled: 0, booked: 0 };
+      byMonth[month].revenue   += r.revenue;
+      byMonth[month].completed += r.completed;
+      byMonth[month].cancelled += r.cancelled;
+      byMonth[month].booked    += r.booked;
+    }
+    for (const m of Object.keys(byMonth)) {
+      byMonth[m].revenue = Math.round(byMonth[m].revenue * 100) / 100;
+    }
+    return byMonth;
   };
+
+  const currentByMonth = aggToMonths(currentDaily);
+  const priorByMonth   = aggToMonths(priorDaily);
+
+  const windowMonths = monthsBetween(dateStart.slice(0,7), dateEnd.slice(0,7));
+  const priorMonths  = windowMonths.map(m => shiftYear(m, -1));
+
+  const windowRows = windowMonths.map(m => currentByMonth[m] || { month: m, revenue: 0, completed: 0, cancelled: 0, booked: 0 });
+  const hasPrior = Object.keys(priorByMonth).length > 0;
+  const priorRows  = hasPrior ? priorMonths.map(m => priorByMonth[m] || null) : [];
+
+  return { windowMonths, priorMonths, windowRows, priorRows, currentDaily, priorDaily };
+}
+
+function shiftDateYear(dateStr, delta) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return `${y + delta}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+}
+
+function monthsBetween(startMonth, endMonth) {
+  const [sy, sm] = startMonth.split("-").map(Number);
+  const [ey, em] = endMonth.split("-").map(Number);
+  const out = [];
+  let y = sy, m = sm;
+  while (y < ey || (y === ey && m <= em)) {
+    out.push(`${y}-${String(m).padStart(2,"0")}`);
+    m += 1; if (m > 12) { m = 1; y += 1; }
+  }
+  return out;
+}
+
+// Format a YYYY-MM-DD date for display in the UI
+function fmtDate(d) {
+  if (!d) return "—";
+  const [y, m, day] = d.split("-").map(Number);
+  return `${MONTH_LABELS[m-1]} ${day}, ${y}`;
 }
 
 function Card({ title, subtitle, children }) {
   return (
-    <div style={{ background:C.card, borderRadius:14, padding:"22px 20px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)", marginBottom:18 }}>
-      <div style={{ marginBottom:14 }}>
-        <div style={{ fontSize:13, fontWeight:700, color:C.text }}>{title}</div>
-        {subtitle && <div style={{ fontSize:11, color:C.muted, marginTop:2 }}>{subtitle}</div>}
+    <div style={{ background:C.card, borderRadius:14, padding:"24px 22px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)", marginBottom:20 }}>
+      <div style={{ marginBottom:16 }}>
+        <div className="chart-title">{title}</div>
+        {subtitle && <div className="chart-subtitle">{subtitle}</div>}
       </div>
       {children}
     </div>
