@@ -16,7 +16,7 @@
   body { background: #F7F4EF; font-family: 'DM Sans', sans-serif; }
   button { cursor: pointer; border: none; outline: none; font-family: inherit; }
   table { border-collapse: collapse; width: 100%; }
-  th, td { text-align: left; padding: 8px 10px; font-size: 12px; }
+  th, td { text-align: left; padding: 8px 10px; font-size: 14px; }
 
   .rail {
     position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
@@ -29,21 +29,21 @@
     padding: 22px 18px; box-shadow: 0 4px 24px rgba(45, 82, 66, 0.08);
   }
   .rail-brand {
-    font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700;
+    font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700;
     color: #1A1A1A; line-height: 1.15; margin-bottom: 4px;
   }
   .rail-brand-sub {
-    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
     color: #B8913F; font-weight: 700; margin-bottom: 26px;
   }
   .rail-section { margin-bottom: 22px; }
   .rail-label {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.12em;
     text-transform: uppercase; color: #B8913F; margin-bottom: 10px;
   }
   .rail-btn {
     display: block; width: 100%; text-align: left; padding: 7px 12px;
-    border-radius: 18px; font-size: 12px; font-weight: 600;
+    border-radius: 18px; font-size: 14px; font-weight: 600;
     margin-bottom: 3px; background: transparent; color: #6B6459;
     transition: all 0.12s;
   }
@@ -53,8 +53,8 @@
   .rail-window {
     display: flex; align-items: center; gap: 8px; margin-top: 4px;
   }
-  .rail-window-label { font-size: 11px; color: #1A1A1A; font-weight: 600; flex: 1; text-align: center; }
-  .rail-prior { font-size: 10px; color: #6B6459; margin-top: 6px; line-height: 1.4; }
+  .rail-window-label { font-size: 13px; color: #1A1A1A; font-weight: 600; flex: 1; text-align: center; }
+  .rail-prior { font-size: 12px; color: #6B6459; margin-top: 6px; line-height: 1.4; }
 
   .report-content { margin-left: 240px; padding: 40px 28px; }
   .report-content-inner { max-width: 920px; margin: 0 auto; }
@@ -62,14 +62,14 @@
   .date-input {
     display: block; width: 100%; padding: 7px 10px; margin-bottom: 8px;
     border-radius: 8px; border: 1px solid #E8E1D6; background: #FFFFFF;
-    font-family: inherit; font-size: 12px; color: #1A1A1A; cursor: pointer;
+    font-family: inherit; font-size: 14px; color: #1A1A1A; cursor: pointer;
   }
   .date-input:focus { outline: none; border-color: #2D5242; }
-  .date-label { font-size: 10px; font-weight: 600; color: #6B6459; margin-bottom: 3px; }
+  .date-label { font-size: 12px; font-weight: 600; color: #6B6459; margin-bottom: 3px; }
 
   .pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
   .pill {
-    padding: 5px 11px; border-radius: 16px; font-size: 11px; font-weight: 600;
+    padding: 5px 11px; border-radius: 16px; font-size: 13px; font-weight: 600;
     border: 1px solid transparent; background: #EDE9E3; color: #6B6459;
     transition: all 0.12s;
   }
@@ -77,8 +77,8 @@
   .pill-active { background: #2D5242; color: #FFFFFF; border-color: #2D5242; }
   .pill-active:hover { background: #2D5242; color: #FFFFFF; }
 
-  .chart-title { font-size: 20px; font-weight: 700; color: #1A1A1A; font-family: 'Cormorant Garamond', serif; }
-  .chart-subtitle { font-size: 12px; color: #6B6459; margin-top: 4px; line-height: 1.5; }
+  .chart-title { font-size: 40px; font-weight: 700; color: #1A1A1A; font-family: 'Cormorant Garamond', serif; line-height: 1.1; }
+  .chart-subtitle { font-size: 14px; color: #6B6459; margin-top: 6px; line-height: 1.5; }
 
   @media (max-width: 900px) {
     .rail {
@@ -139,12 +139,12 @@ const KPI = ({ label, value, delta, accent, hint }) => {
   const deltaColor = delta == null ? C.muted : (isUp ? C.green : C.accent);
   return (
     <div style={{ background:C.card, borderRadius:14, padding:"22px 18px", flex:1, minWidth:160, boxShadow:"0 2px 12px rgba(0,0,0,0.06)", border:"1px solid rgba(0,0,0,0.06)", borderTop:`3px solid ${accent||C.green}` }}>
-      <div style={{ fontSize:11, fontWeight:700, color:C.text, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:10 }}>{label}</div>
-      <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:32, fontWeight:700, color:accent||C.green, lineHeight:1, marginBottom:8 }}>{value}</div>
-      <div style={{ fontSize:12, color:deltaColor, fontWeight:600 }}>
+      <div style={{ fontSize:13, fontWeight:700, color:C.text, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:10 }}>{label}</div>
+      <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, fontWeight:700, color:accent||C.green, lineHeight:1, marginBottom:8 }}>{value}</div>
+      <div style={{ fontSize:14, color:deltaColor, fontWeight:600 }}>
         {delta == null ? "No prior-year data" : `${isUp ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}% vs. prior year`}
       </div>
-      {hint && <div style={{ fontSize:11, color:C.muted, marginTop:6, lineHeight:1.5 }}>{hint}</div>}
+      {hint && <div style={{ fontSize:13, color:C.muted, marginTop:6, lineHeight:1.5 }}>{hint}</div>}
     </div>
   );
 };
@@ -157,16 +157,16 @@ const SectionKPI = ({ label, value, sub, color, accent }) => (
     border: "1px solid rgba(0,0,0,0.06)",
     borderTop: accent ? `3px solid ${accent}` : undefined,
   }}>
-    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, fontWeight:700, color:accent||C.green, lineHeight:1, marginBottom:6 }}>{value}</div>
-    <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.04em", textTransform:"uppercase", marginBottom: sub?4:0 }}>{label}</div>
-    {sub && <div style={{ fontSize:11, color:C.muted, lineHeight:1.5 }}>{sub}</div>}
+    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:36, fontWeight:700, color:accent||C.green, lineHeight:1, marginBottom:6 }}>{value}</div>
+    <div style={{ fontSize:14, fontWeight:700, color:C.text, letterSpacing:"0.04em", textTransform:"uppercase", marginBottom: sub?4:0 }}>{label}</div>
+    {sub && <div style={{ fontSize:13, color:C.muted, lineHeight:1.5 }}>{sub}</div>}
   </div>
 );
 
 const Step = ({ n, children }) => (
   <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
-    <div style={{ width:28, height:28, borderRadius:"50%", background:C.green, color:"#fff", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
-    <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:C.text, margin:0 }}>{children}</h2>
+    <div style={{ width:28, height:28, borderRadius:"50%", background:C.green, color:"#fff", fontSize:15, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
+    <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:44, fontWeight:700, color:C.text, margin:0 }}>{children}</h2>
   </div>
 );
 
@@ -175,7 +175,7 @@ const StackTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const get = k => payload.find(p => p.dataKey === k)?.value ?? 0;
   return (
-    <div style={{ background:C.green, color:"#fff", borderRadius:10, padding:"12px 16px", fontSize:12, boxShadow:"0 4px 20px rgba(0,0,0,0.25)", minWidth:180 }}>
+    <div style={{ background:C.green, color:"#fff", borderRadius:10, padding:"12px 16px", fontSize:14, boxShadow:"0 4px 20px rgba(0,0,0,0.25)", minWidth:180 }}>
       <div style={{ fontWeight:700, marginBottom:8 }}>{label}</div>
       {[["completed","#a8d4bc","✓ Completed"],["cancelled","#e8b499","✗ Cancelled"]].map(([k,col,lbl]) => (
         <div key={k} style={{ display:"flex", justifyContent:"space-between", gap:16, marginBottom:3 }}>
@@ -193,7 +193,7 @@ const UtilTooltip = ({ active, payload }) => {
   const p = payload[0]?.payload;
   if (!p) return null;
   return (
-    <div style={{ background:C.green, color:"#fff", borderRadius:10, padding:"12px 16px", fontSize:12, boxShadow:"0 4px 20px rgba(0,0,0,0.25)", minWidth:220 }}>
+    <div style={{ background:C.green, color:"#fff", borderRadius:10, padding:"12px 16px", fontSize:14, boxShadow:"0 4px 20px rgba(0,0,0,0.25)", minWidth:220 }}>
       <div style={{ fontWeight:700, marginBottom:8 }}>{p.fullName || p.name}</div>
       <div style={{ display:"flex", justifyContent:"space-between", gap:16, marginBottom:3 }}>
         <span style={{ color:"#a8d4bc" }}>✓ Completed</span>
@@ -207,7 +207,7 @@ const UtilTooltip = ({ active, payload }) => {
         <span style={{ color:"#c8bfb5" }}>○ Idle</span>
         <span style={{ fontWeight:700 }}>{p.idlePct}% · {p.idleHours?.toFixed(0)}h</span>
       </div>
-      <div style={{ fontSize:11, color:"#c8bfb5", marginTop:6, paddingTop:6, borderTop:"1px solid rgba(255,255,255,0.15)" }}>
+      <div style={{ fontSize:13, color:"#c8bfb5", marginTop:6, paddingTop:6, borderTop:"1px solid rgba(255,255,255,0.15)" }}>
         {p.shiftHours?.toFixed(0)}h scheduled capacity
       </div>
     </div>
@@ -218,7 +218,7 @@ const UtilTooltip = ({ active, payload }) => {
 const LineTooltip = ({ active, payload, label, formatter }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background:C.green, color:"#fff", borderRadius:10, padding:"10px 14px", fontSize:12, boxShadow:"0 4px 20px rgba(0,0,0,0.2)" }}>
+    <div style={{ background:C.green, color:"#fff", borderRadius:10, padding:"10px 14px", fontSize:14, boxShadow:"0 4px 20px rgba(0,0,0,0.2)" }}>
       <div style={{ fontWeight:700, marginBottom:6 }}>{label}</div>
       {payload.map((p,i) => (
         <div key={i} style={{ display:"flex", justifyContent:"space-between", gap:14, marginBottom:2 }}>
@@ -454,11 +454,11 @@ function App() {
 
         {/* HEADER */}
         <div style={{ marginBottom:28, borderLeft:`4px solid ${C.green}`, paddingLeft:20 }}>
-          <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:C.gold, marginBottom:10 }}>Monthly Report</div>
-          <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:36, fontWeight:700, color:C.text, lineHeight:1.2, margin:"0 0 12px" }}>
+          <div style={{ fontSize:13, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:C.gold, marginBottom:10 }}>Monthly Report</div>
+          <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:38, fontWeight:700, color:C.text, lineHeight:1.2, margin:"0 0 12px" }}>
             Revenue, Bookings & Cancellations
           </h1>
-          <p style={{ fontSize:13, color:C.muted, maxWidth:560, lineHeight:1.7, margin:0 }}>
+          <p style={{ fontSize:15, color:C.muted, maxWidth:560, lineHeight:1.7, margin:0 }}>
             Data through <strong style={{ color:C.text }}>{data.dataThrough ? monthLabel(data.dataThrough) : "—"}</strong>
             {data.updatedAt && <> · Updated {new Date(data.updatedAt).toLocaleDateString()}</>}
           </p>
@@ -471,12 +471,97 @@ function App() {
           <KPI label="Cancellations"  value={fmtNum(kpis.cancelled.cur)}   delta={pct(kpis.cancelled.cur, kpis.cancelled.prior)} accent={C.accent}     hint={cancRate != null ? `${cancRate.toFixed(1)}% cancellation rate` : null} />
         </div>
 
+        {/* STACKED BAR: monthly bookings (completed + cancelled) */}
+        <Card title="Monthly Bookings" subtitle="Completed vs. cancelled by month — cancellations sit on top so the lost portion is visible">
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={stackChart} margin={{ top:10, right:10, left:-10, bottom:0 }} barSize={44}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize:14, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize:13, fill:C.muted }} axisLine={false} tickLine={false} />
+              <Tooltip content={<StackTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
+              <Bar dataKey="completed" stackId="a" fill={C.green}     name="Booked & Completed" />
+              <Bar dataKey="cancelled" stackId="a" fill={C.cancelled} name="Booked but Cancelled" radius={[6,6,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+          <Legend2Layer />
+        </Card>
+
+        {/* SCHEDULE UTILIZATION — three-layer bucket per therapist; toggle any practitioner on/off */}
+        {allPractitioners.length > 0 && (
+          <Card
+            title="Schedule Utilization by Therapist"
+            subtitle="Completed, cancelled, and idle as % of scheduled capacity. Toggle any practitioner in the clinic on or off."
+          >
+            <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap" }}>
+              {["1mo","4mo","12mo"].filter(k => snapshotAvailable.includes(k)).map(k => (
+                <button key={k} onClick={() => setSnapshotKey(k)} style={{
+                  padding:"5px 14px", borderRadius:20, fontSize:14, fontWeight:600,
+                  background: snapshotKey===k ? C.green : "#EDE9E3",
+                  color: snapshotKey===k ? "#fff" : C.muted,
+                }}>{SNAPSHOT_LABELS[k]}</button>
+              ))}
+            </div>
+
+            {/* Practitioner pill selector */}
+            <div className="pill-row">
+              {allPractitioners.map(n => {
+                const active = activeSet.has(n);
+                const short = n.split(" ")[0];
+                return (
+                  <button
+                    key={n}
+                    className={`pill${active ? " pill-active" : ""}`}
+                    onClick={() => togglePractitioner(n)}
+                    title={n}
+                  >
+                    {active ? "✓ " : "+ "}{short}
+                  </button>
+                );
+              })}
+            </div>
+
+            {utilChartData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={utilChartData} margin={{ top:14, right:10, left:-15, bottom:0 }} barSize={52}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize:15, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
+                    <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize:13, fill:C.muted }} domain={[0,100]} axisLine={false} tickLine={false} />
+                    <Tooltip content={<UtilTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
+                    <Bar dataKey="completedPct" stackId="u" fill={C.green} name="Completed">
+                      <LabelList dataKey="completedPct" position="center" formatter={v => v > 6 ? `${v}%` : ""} style={{ fill:"#fff", fontSize:13, fontWeight:700 }} />
+                    </Bar>
+                    <Bar dataKey="cancelledPct" stackId="u" fill={C.cancelled} name="Cancelled">
+                      <LabelList dataKey="cancelledPct" position="center" formatter={v => v > 4 ? `${v}%` : ""} style={{ fill:"#fff", fontSize:12, fontWeight:700 }} />
+                    </Bar>
+                    <Bar dataKey="idlePct" stackId="u" fill={C.empty} name="Idle" radius={[6,6,0,0]}>
+                      <LabelList dataKey="idlePct" position="top" formatter={v => v > 5 ? `${v}% idle` : ""} style={{ fill:C.muted, fontSize:13, fontWeight:700 }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <div style={{ display:"flex", gap:16, marginTop:10, justifyContent:"center", flexWrap:"wrap" }}>
+                  {[[C.green,"Completed"],[C.cancelled,"Cancelled"],[C.empty,"Idle capacity"]].map(([col,lbl]) => (
+                    <div key={lbl} style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <div style={{ width:10, height:10, borderRadius:2, background:col }} />
+                      <span style={{ fontSize:13, color:C.muted }}>{lbl}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div style={{ fontSize:16, color:C.muted, padding:"24px 0", textAlign:"center" }}>
+                Select at least one practitioner above to show their utilization.
+              </div>
+            )}
+          </Card>
+        )}
+
         {/* SECTION 1 — The real cost of empty hours (segment-driven, 12mo snapshot) */}
-        {/* Styled to match the capacity report so the client sees a consistent visual idiom. */}
+        {/* Placed after Schedule Utilization so the "why it matters" framing follows the chart. */}
         {section1 && (
           <div style={{ marginBottom:36 }}>
             <Step n="1">The Real Cost of Empty Hours</Step>
-            <div style={{ fontSize:12, color:C.muted, marginBottom:14, marginLeft:40 }}>
+            <div style={{ fontSize:16, color:C.muted, marginBottom:14, marginLeft:40 }}>
               {isAggregateSegment ? section1.segLabel : `${section1.segLabel}'s schedule`}
               {` · last 12 months (${fmtDate(section1.windowStart)} – ${fmtDate(section1.windowEnd)}) · at the standard $${section1.avgRate}/hr rate`}
               {blendedRate ? ` · realized blended rate: $${blendedRate.toFixed(0)}/hr` : ""}
@@ -531,10 +616,10 @@ function App() {
                       boxShadow: "0 1px 6px rgba(0,0,0,0.05)", borderLeft: `3px solid ${col}`,
                     }}>
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                        <div style={{ fontSize:14, fontWeight:700, color:C.text }}>{first}</div>
-                        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:col }}>{fillPct}% booked</div>
+                        <div style={{ fontSize:18, fontWeight:700, color:C.text }}>{first}</div>
+                        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:26, fontWeight:700, color:col }}>{fillPct}% booked</div>
                       </div>
-                      <div style={{ fontSize:11, color:C.muted, marginTop:4 }}>
+                      <div style={{ fontSize:15, color:C.muted, marginTop:4 }}>
                         <strong style={{ color:C.text }}>{idlePct}% idle</strong> · ~${idleRev.toLocaleString()}/mo in unrealized revenue
                       </div>
                     </div>
@@ -545,98 +630,13 @@ function App() {
           </div>
         )}
 
-        {/* STACKED BAR: monthly bookings (completed + cancelled) */}
-        <Card title="Monthly Bookings" subtitle="Completed vs. cancelled by month — cancellations sit on top so the lost portion is visible">
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={stackChart} margin={{ top:10, right:10, left:-10, bottom:0 }} barSize={44}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize:12, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize:11, fill:C.muted }} axisLine={false} tickLine={false} />
-              <Tooltip content={<StackTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
-              <Bar dataKey="completed" stackId="a" fill={C.green}     name="Booked & Completed" />
-              <Bar dataKey="cancelled" stackId="a" fill={C.cancelled} name="Booked but Cancelled" radius={[6,6,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
-          <Legend2Layer />
-        </Card>
-
-        {/* SCHEDULE UTILIZATION — three-layer bucket per therapist; toggle any practitioner on/off */}
-        {allPractitioners.length > 0 && (
-          <Card
-            title="Schedule Utilization by Therapist"
-            subtitle="Completed, cancelled, and idle as % of scheduled capacity. Toggle any practitioner in the clinic on or off."
-          >
-            <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap" }}>
-              {["1mo","4mo","12mo"].filter(k => snapshotAvailable.includes(k)).map(k => (
-                <button key={k} onClick={() => setSnapshotKey(k)} style={{
-                  padding:"5px 14px", borderRadius:20, fontSize:12, fontWeight:600,
-                  background: snapshotKey===k ? C.green : "#EDE9E3",
-                  color: snapshotKey===k ? "#fff" : C.muted,
-                }}>{SNAPSHOT_LABELS[k]}</button>
-              ))}
-            </div>
-
-            {/* Practitioner pill selector */}
-            <div className="pill-row">
-              {allPractitioners.map(n => {
-                const active = activeSet.has(n);
-                const short = n.split(" ")[0];
-                return (
-                  <button
-                    key={n}
-                    className={`pill${active ? " pill-active" : ""}`}
-                    onClick={() => togglePractitioner(n)}
-                    title={n}
-                  >
-                    {active ? "✓ " : "+ "}{short}
-                  </button>
-                );
-              })}
-            </div>
-
-            {utilChartData.length > 0 ? (
-              <>
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={utilChartData} margin={{ top:14, right:10, left:-15, bottom:0 }} barSize={52}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize:13, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
-                    <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize:11, fill:C.muted }} domain={[0,100]} axisLine={false} tickLine={false} />
-                    <Tooltip content={<UtilTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
-                    <Bar dataKey="completedPct" stackId="u" fill={C.green} name="Completed">
-                      <LabelList dataKey="completedPct" position="center" formatter={v => v > 6 ? `${v}%` : ""} style={{ fill:"#fff", fontSize:11, fontWeight:700 }} />
-                    </Bar>
-                    <Bar dataKey="cancelledPct" stackId="u" fill={C.cancelled} name="Cancelled">
-                      <LabelList dataKey="cancelledPct" position="center" formatter={v => v > 4 ? `${v}%` : ""} style={{ fill:"#fff", fontSize:10, fontWeight:700 }} />
-                    </Bar>
-                    <Bar dataKey="idlePct" stackId="u" fill={C.empty} name="Idle" radius={[6,6,0,0]}>
-                      <LabelList dataKey="idlePct" position="top" formatter={v => v > 5 ? `${v}% idle` : ""} style={{ fill:C.muted, fontSize:11, fontWeight:700 }} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-                <div style={{ display:"flex", gap:16, marginTop:10, justifyContent:"center", flexWrap:"wrap" }}>
-                  {[[C.green,"Completed"],[C.cancelled,"Cancelled"],[C.empty,"Idle capacity"]].map(([col,lbl]) => (
-                    <div key={lbl} style={{ display:"flex", alignItems:"center", gap:6 }}>
-                      <div style={{ width:10, height:10, borderRadius:2, background:col }} />
-                      <span style={{ fontSize:11, color:C.muted }}>{lbl}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div style={{ fontSize:12, color:C.muted, padding:"24px 0", textAlign:"center" }}>
-                Select at least one practitioner above to show their utilization.
-              </div>
-            )}
-          </Card>
-        )}
-
         {/* REVENUE YoY */}
         <Card title="Revenue — year over year" subtitle="Monthly revenue for the selected window, with prior-year overlay">
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={revChart} margin={{ top:10, right:20, left:-5, bottom:0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize:12, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize:11, fill:C.muted }} tickFormatter={fmtMoney} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize:14, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize:13, fill:C.muted }} tickFormatter={fmtMoney} axisLine={false} tickLine={false} />
               <Tooltip content={<LineTooltip formatter={fmtMoney} />} />
               <Line type="monotone" dataKey="current" stroke={C.green} strokeWidth={3} dot={{ r:4 }} name="Current" />
               <Line type="monotone" dataKey="prior"   stroke={C.gold}  strokeWidth={2} dot={{ r:3 }} strokeDasharray="5 4" name="Prior year" connectNulls={false} />
@@ -649,8 +649,8 @@ function App() {
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={bkChart} margin={{ top:10, right:20, left:-5, bottom:0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize:12, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize:11, fill:C.muted }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize:14, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize:13, fill:C.muted }} axisLine={false} tickLine={false} />
               <Tooltip content={<LineTooltip formatter={fmtNum} />} />
               <Line type="monotone" dataKey="current" stroke={C.greenLight} strokeWidth={3} dot={{ r:4 }} name="Current" />
               <Line type="monotone" dataKey="prior"   stroke={C.gold}       strokeWidth={2} dot={{ r:3 }} strokeDasharray="5 4" name="Prior year" connectNulls={false} />
@@ -663,8 +663,8 @@ function App() {
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={cancChart} margin={{ top:10, right:20, left:-5, bottom:0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize:12, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize:11, fill:C.muted }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize:14, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize:13, fill:C.muted }} axisLine={false} tickLine={false} />
               <Tooltip content={<LineTooltip formatter={fmtNum} />} />
               <Line type="monotone" dataKey="current" stroke={C.accent} strokeWidth={3} dot={{ r:4 }} name="Current" />
               <Line type="monotone" dataKey="prior"   stroke={C.gold}   strokeWidth={2} dot={{ r:3 }} strokeDasharray="5 4" name="Prior year" connectNulls={false} />
@@ -677,7 +677,7 @@ function App() {
           <div style={{ overflowX:"auto" }}>
             <table>
               <thead>
-                <tr style={{ borderBottom:`2px solid ${C.greenPale}`, color:C.muted, fontWeight:700, textTransform:"uppercase", fontSize:10, letterSpacing:"0.06em" }}>
+                <tr style={{ borderBottom:`2px solid ${C.greenPale}`, color:C.muted, fontWeight:700, textTransform:"uppercase", fontSize:12, letterSpacing:"0.06em" }}>
                   <th>Month</th>
                   <th style={{ textAlign:"right" }}>Revenue</th>
                   <th style={{ textAlign:"right" }}>YoY</th>
@@ -803,7 +803,7 @@ function Legend2Layer() {
       {[[C.green,"Booked & Completed"],[C.cancelled,"Booked but Cancelled"]].map(([col,lbl]) => (
         <div key={lbl} style={{ display:"flex", alignItems:"center", gap:6 }}>
           <div style={{ width:10, height:10, borderRadius:2, background:col }} />
-          <span style={{ fontSize:11, color:C.muted }}>{lbl}</span>
+          <span style={{ fontSize:13, color:C.muted }}>{lbl}</span>
         </div>
       ))}
     </div>
@@ -822,8 +822,8 @@ function EmptyState({ message }) {
   return (
     <div style={{ background:C.bg, minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px" }}>
       <div style={{ maxWidth:480, textAlign:"center" }}>
-        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, color:C.text, marginBottom:12 }}>No data yet</div>
-        <div style={{ fontSize:13, color:C.muted, lineHeight:1.6 }}>{message}</div>
+        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:56, color:C.text, marginBottom:12 }}>No data yet</div>
+        <div style={{ fontSize:15, color:C.muted, lineHeight:1.6 }}>{message}</div>
       </div>
     </div>
   );
