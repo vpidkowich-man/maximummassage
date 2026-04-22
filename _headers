@@ -1,0 +1,5 @@
+/reports/*
+  X-Robots-Tag: noindex, nofollow
+
+/public/reports/*
+  X-Robots-Tag: noindex, nofollow

@@ -1,0 +1,2 @@
+# Mount reports under /reports/ (publish dir is repo root, files live in public/)
+/reports/* /public/reports/:splat 200
