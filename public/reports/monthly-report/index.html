@@ -181,8 +181,8 @@ function App() {
     apptHours: snapshot.apptHours || 0,
     idleHours: snapshot.idleHours || 0,
   }] : [];
-  const snapshotUtilization = snapshot && snapshot.workingHours > 0
-    ? (snapshot.apptHours / snapshot.workingHours) * 100
+  const snapshotUtilization = snapshot && snapshot.shiftHours > 0
+    ? (snapshot.apptHours / snapshot.shiftHours) * 100
     : null;
   const revChart = windowMonths.map((m, i) => ({
     name: monthLabel(m),
@@ -215,8 +215,14 @@ function App() {
           </p>
         </div>
 
-        {/* SEGMENT SELECTOR */}
-        <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:22 }}>
+        {/* SEGMENT SELECTOR — sticky so practitioners can be switched without scrolling up */}
+        <div style={{
+          position:"sticky", top:0, zIndex:10,
+          display:"flex", gap:8, flexWrap:"wrap",
+          padding:"12px 0 14px", marginBottom:8,
+          background:C.bg,
+          borderBottom:"1px solid #E8E1D6",
+        }}>
           {Object.entries(data.segments).map(([k, s]) => (
             <button key={k} onClick={() => setSegmentKey(k)} style={{
               padding:"8px 16px", borderRadius:20, fontSize:12, fontWeight:600,
@@ -293,7 +299,7 @@ function App() {
                   </BarChart>
                 </ResponsiveContainer>
                 <div style={{ fontSize:11, color:C.muted, marginTop:6 }}>
-                  {snapshot.workingHours.toFixed(0)}h working capacity (shift {snapshot.shiftHours.toFixed(0)}h minus breaks). Cancellations are captured in the monthly view above — this snapshot covers booked vs. never-filled only.
+                  {snapshot.shiftHours.toFixed(0)}h total scheduled capacity. Cancellations are captured in the monthly view above — this snapshot covers booked vs. never-filled only.
                 </div>
               </>
             ) : (

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-22T20:10:14.291Z",
+  "updatedAt": "2026-04-22T21:11:22.031Z",
   "dataThrough": "2026-04",
   "practitioners": {
     "all": [
@@ -131,23 +131,20 @@
       "snapshot": {
         "1mo": {
           "shiftHours": 184.3,
-          "workingHours": 100.9,
           "apptHours": 60.8,
-          "idleHours": 40.1,
+          "idleHours": 123.4,
           "apptCount": 42
         },
         "4mo": {
           "shiftHours": 737.7,
-          "workingHours": 349.8,
           "apptHours": 283.1,
-          "idleHours": 66.7,
+          "idleHours": 454.6,
           "apptCount": 199
         },
         "12mo": {
           "shiftHours": 2349.1,
-          "workingHours": 1133.8,
           "apptHours": 994.2,
-          "idleHours": 139.6,
+          "idleHours": 1354.9,
           "apptCount": 717
         }
       }
@@ -243,23 +240,20 @@
       "snapshot": {
         "1mo": {
           "shiftHours": 85.9,
-          "workingHours": 41.8,
           "apptHours": 28,
-          "idleHours": 13.8,
+          "idleHours": 57.9,
           "apptCount": 18
         },
         "4mo": {
           "shiftHours": 324.2,
-          "workingHours": 129.4,
           "apptHours": 128.2,
-          "idleHours": 1.3,
+          "idleHours": 196,
           "apptCount": 86
         },
         "12mo": {
           "shiftHours": 958.9,
-          "workingHours": 357.5,
           "apptHours": 388.1,
-          "idleHours": 0,
+          "idleHours": 570.8,
           "apptCount": 267
         }
       }
@@ -341,23 +335,20 @@
       "snapshot": {
         "1mo": {
           "shiftHours": 52.5,
-          "workingHours": 29,
           "apptHours": 8,
-          "idleHours": 21,
+          "idleHours": 44.5,
           "apptCount": 6
         },
         "4mo": {
           "shiftHours": 202.5,
-          "workingHours": 99.3,
           "apptHours": 37.3,
-          "idleHours": 62.1,
+          "idleHours": 165.3,
           "apptCount": 28
         },
         "12mo": {
           "shiftHours": 527.5,
-          "workingHours": 270.3,
           "apptHours": 116.8,
-          "idleHours": 153.6,
+          "idleHours": 410.8,
           "apptCount": 88
         }
       }
@@ -453,23 +444,20 @@
       "snapshot": {
         "1mo": {
           "shiftHours": 28.3,
-          "workingHours": 13.8,
           "apptHours": 14.3,
-          "idleHours": 0,
+          "idleHours": 14,
           "apptCount": 10
         },
         "4mo": {
           "shiftHours": 156,
-          "workingHours": 79,
           "apptHours": 81.2,
-          "idleHours": 0,
+          "idleHours": 74.8,
           "apptCount": 58
         },
         "12mo": {
           "shiftHours": 644.2,
-          "workingHours": 348.2,
           "apptHours": 352.8,
-          "idleHours": 0,
+          "idleHours": 291.3,
           "apptCount": 259
         }
       }
@@ -565,23 +553,20 @@
       "snapshot": {
         "1mo": {
           "shiftHours": 17.5,
-          "workingHours": 16.3,
           "apptHours": 10.5,
-          "idleHours": 5.8,
+          "idleHours": 7,
           "apptCount": 8
         },
         "4mo": {
           "shiftHours": 55,
-          "workingHours": 42,
           "apptHours": 36.5,
-          "idleHours": 5.5,
+          "idleHours": 18.5,
           "apptCount": 27
         },
         "12mo": {
           "shiftHours": 218.5,
-          "workingHours": 157.7,
           "apptHours": 136.5,
-          "idleHours": 21.2,
+          "idleHours": 82,
           "apptCount": 103
         }
       }
@@ -677,23 +662,20 @@
       "snapshot": {
         "1mo": {
           "shiftHours": 611,
-          "workingHours": 409.8,
           "apptHours": 363.1,
-          "idleHours": 46.7,
+          "idleHours": 247.9,
           "apptCount": 316
         },
         "4mo": {
           "shiftHours": 2292.2,
-          "workingHours": 1427.8,
           "apptHours": 1431.8,
-          "idleHours": 0,
+          "idleHours": 860.4,
           "apptCount": 1258
         },
         "12mo": {
           "shiftHours": 7618.2,
-          "workingHours": 4736.3,
           "apptHours": 4723.1,
-          "idleHours": 13.3,
+          "idleHours": 2895.1,
           "apptCount": 4197
         }
       }

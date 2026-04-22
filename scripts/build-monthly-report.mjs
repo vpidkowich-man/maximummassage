@@ -293,11 +293,12 @@ function buildSnapshot(file, staffPredicate) {
     apptCount += Number(r[COLS.availability.apptCount]) || 0;
   }
   if (matched === 0) return null;
-  const working = shift - brk;
-  const idle = Math.max(0, working - appt);
+  // EHR's "Break" column in this export isn't lunch breaks — for some practitioners
+  // it's larger than (shift - appt), which would make shift-minus-breaks nonsense.
+  // Treat shift hours as the total available capacity; idle = shift - appt.
+  const idle = Math.max(0, shift - appt);
   return {
     shiftHours: round1(shift),
-    workingHours: round1(working),
     apptHours: round1(appt),
     idleHours: round1(idle),
     apptCount,
