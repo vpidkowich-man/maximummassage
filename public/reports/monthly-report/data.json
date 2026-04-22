@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-22T21:11:22.031Z",
+  "updatedAt": "2026-04-22T21:28:47.117Z",
   "dataThrough": "2026-04",
   "practitioners": {
     "all": [
@@ -31,8 +31,14 @@
     ]
   },
   "sourceFiles": {
-    "revenue": "2026.04 revenues last 12 months May 1 2025 to April 30 2026.xlsx",
-    "cancellations": "2026.04 12 month may 1 2025 to april 30 2026 Cancelled appointments.xlsx",
+    "revenue": [
+      "2026.04 revenue from may 1 2024 to apr 30 2025.xlsx",
+      "2026.04 revenues last 12 months May 1 2025 to April 30 2026.xlsx"
+    ],
+    "cancellations": [
+      "2026.04 12 month may 1 2025 to april 30 2026 Cancelled appointments.xlsx",
+      "2026.04 may 1 2024 to apr 30 2025 cancellations.xlsx"
+    ],
     "availability": {
       "12mo": "Available vs Booked 12 months enfing apr 30 2026.xlsx",
       "4mo": "Available vs Booked 4 months ending apr 30 2026.xlsx",
@@ -43,6 +49,76 @@
     "all-massage": {
       "label": "All Massage",
       "monthly": [
+        {
+          "month": "2024-05",
+          "revenue": 4294.27,
+          "completed": 35,
+          "cancelled": 4,
+          "booked": 39
+        },
+        {
+          "month": "2024-06",
+          "revenue": 4034.66,
+          "completed": 30,
+          "cancelled": 9,
+          "booked": 39
+        },
+        {
+          "month": "2024-07",
+          "revenue": 2956.83,
+          "completed": 24,
+          "cancelled": 7,
+          "booked": 31
+        },
+        {
+          "month": "2024-08",
+          "revenue": 603.75,
+          "completed": 5,
+          "cancelled": 2,
+          "booked": 7
+        },
+        {
+          "month": "2024-11",
+          "revenue": 2095.03,
+          "completed": 17,
+          "cancelled": 13,
+          "booked": 30
+        },
+        {
+          "month": "2024-12",
+          "revenue": 5356.05,
+          "completed": 47,
+          "cancelled": 37,
+          "booked": 84
+        },
+        {
+          "month": "2025-01",
+          "revenue": 5161.5,
+          "completed": 38,
+          "cancelled": 19,
+          "booked": 57
+        },
+        {
+          "month": "2025-02",
+          "revenue": 6242.78,
+          "completed": 46,
+          "cancelled": 14,
+          "booked": 60
+        },
+        {
+          "month": "2025-03",
+          "revenue": 6847.55,
+          "completed": 50,
+          "cancelled": 4,
+          "booked": 54
+        },
+        {
+          "month": "2025-04",
+          "revenue": 7315.6,
+          "completed": 57,
+          "cancelled": 11,
+          "booked": 68
+        },
         {
           "month": "2025-05",
           "revenue": 6271.3,
@@ -152,6 +228,41 @@
     "Brookelyn Brolly": {
       "label": "Brookelyn Brolly",
       "monthly": [
+        {
+          "month": "2024-12",
+          "revenue": 1147.13,
+          "completed": 9,
+          "cancelled": 7,
+          "booked": 16
+        },
+        {
+          "month": "2025-01",
+          "revenue": 1627.5,
+          "completed": 12,
+          "cancelled": 7,
+          "booked": 19
+        },
+        {
+          "month": "2025-02",
+          "revenue": 2512.86,
+          "completed": 18,
+          "cancelled": 5,
+          "booked": 23
+        },
+        {
+          "month": "2025-03",
+          "revenue": 3222.45,
+          "completed": 22,
+          "cancelled": 1,
+          "booked": 23
+        },
+        {
+          "month": "2025-04",
+          "revenue": 2799.3,
+          "completed": 23,
+          "cancelled": 4,
+          "booked": 27
+        },
         {
           "month": "2025-05",
           "revenue": 2604,
@@ -357,6 +468,76 @@
       "label": "Lindsey Stauffer",
       "monthly": [
         {
+          "month": "2024-05",
+          "revenue": 4294.27,
+          "completed": 35,
+          "cancelled": 4,
+          "booked": 39
+        },
+        {
+          "month": "2024-06",
+          "revenue": 4034.66,
+          "completed": 30,
+          "cancelled": 9,
+          "booked": 39
+        },
+        {
+          "month": "2024-07",
+          "revenue": 2956.83,
+          "completed": 24,
+          "cancelled": 7,
+          "booked": 31
+        },
+        {
+          "month": "2024-08",
+          "revenue": 603.75,
+          "completed": 5,
+          "cancelled": 2,
+          "booked": 7
+        },
+        {
+          "month": "2024-11",
+          "revenue": 1310.15,
+          "completed": 11,
+          "cancelled": 7,
+          "booked": 18
+        },
+        {
+          "month": "2024-12",
+          "revenue": 2685.92,
+          "completed": 24,
+          "cancelled": 19,
+          "booked": 43
+        },
+        {
+          "month": "2025-01",
+          "revenue": 2604,
+          "completed": 19,
+          "cancelled": 6,
+          "booked": 25
+        },
+        {
+          "month": "2025-02",
+          "revenue": 2551.92,
+          "completed": 19,
+          "cancelled": 7,
+          "booked": 26
+        },
+        {
+          "month": "2025-03",
+          "revenue": 2593.5,
+          "completed": 20,
+          "cancelled": 2,
+          "booked": 22
+        },
+        {
+          "month": "2025-04",
+          "revenue": 3164.7,
+          "completed": 23,
+          "cancelled": 6,
+          "booked": 29
+        },
+        {
           "month": "2025-05",
           "revenue": 2799.3,
           "completed": 21,
@@ -466,6 +647,48 @@
       "label": "Meagan Brown",
       "monthly": [
         {
+          "month": "2024-11",
+          "revenue": 784.88,
+          "completed": 6,
+          "cancelled": 6,
+          "booked": 12
+        },
+        {
+          "month": "2024-12",
+          "revenue": 1523,
+          "completed": 14,
+          "cancelled": 11,
+          "booked": 25
+        },
+        {
+          "month": "2025-01",
+          "revenue": 930,
+          "completed": 7,
+          "cancelled": 6,
+          "booked": 13
+        },
+        {
+          "month": "2025-02",
+          "revenue": 1178,
+          "completed": 9,
+          "cancelled": 2,
+          "booked": 11
+        },
+        {
+          "month": "2025-03",
+          "revenue": 1031.6,
+          "completed": 8,
+          "cancelled": 1,
+          "booked": 9
+        },
+        {
+          "month": "2025-04",
+          "revenue": 1351.6,
+          "completed": 11,
+          "cancelled": 1,
+          "booked": 12
+        },
+        {
           "month": "2025-05",
           "revenue": 868,
           "completed": 7,
@@ -574,6 +797,90 @@
     "whole-clinic": {
       "label": "Whole Clinic",
       "monthly": [
+        {
+          "month": "2024-05",
+          "revenue": 43673.24,
+          "completed": 406,
+          "cancelled": 4,
+          "booked": 410
+        },
+        {
+          "month": "2024-06",
+          "revenue": 33849.62,
+          "completed": 317,
+          "cancelled": 9,
+          "booked": 326
+        },
+        {
+          "month": "2024-07",
+          "revenue": 40572.55,
+          "completed": 380,
+          "cancelled": 7,
+          "booked": 387
+        },
+        {
+          "month": "2024-08",
+          "revenue": 40810.91,
+          "completed": 358,
+          "cancelled": 2,
+          "booked": 360
+        },
+        {
+          "month": "2024-09",
+          "revenue": 50416.4,
+          "completed": 451,
+          "cancelled": 0,
+          "booked": 451
+        },
+        {
+          "month": "2024-10",
+          "revenue": 55256.79,
+          "completed": 483,
+          "cancelled": 0,
+          "booked": 483
+        },
+        {
+          "month": "2024-11",
+          "revenue": 50055.77,
+          "completed": 444,
+          "cancelled": 13,
+          "booked": 457
+        },
+        {
+          "month": "2024-12",
+          "revenue": 52025.08,
+          "completed": 450,
+          "cancelled": 37,
+          "booked": 487
+        },
+        {
+          "month": "2025-01",
+          "revenue": 50429,
+          "completed": 416,
+          "cancelled": 19,
+          "booked": 435
+        },
+        {
+          "month": "2025-02",
+          "revenue": 48397.97,
+          "completed": 399,
+          "cancelled": 14,
+          "booked": 413
+        },
+        {
+          "month": "2025-03",
+          "revenue": 48202.93,
+          "completed": 398,
+          "cancelled": 4,
+          "booked": 402
+        },
+        {
+          "month": "2025-04",
+          "revenue": 46145.68,
+          "completed": 395,
+          "cancelled": 11,
+          "booked": 406
+        },
         {
           "month": "2025-05",
           "revenue": 41941.32,

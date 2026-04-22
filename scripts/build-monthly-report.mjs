@@ -127,6 +127,17 @@ function latestFile(dir) {
   return files[0];
 }
 
+// Read every .xlsx in a folder and concat rows. Lets us combine current-year
+// and prior-year exports in the same folder (non-overlapping date ranges).
+function readAllSheets(dir) {
+  const files = xlsxIn(dir);
+  if (!files.length) return { rows: [], files: [] };
+  files.sort((a, b) => a.name.localeCompare(b.name));
+  const rows = [];
+  for (const f of files) rows.push(...readSheet(f.path));
+  return { rows, files };
+}
+
 function availabilityFiles(dir) {
   const all = xlsxIn(dir);
   // \b prevents "04 month" (from a date like 2026.04) from matching "4 month".
@@ -313,25 +324,25 @@ async function main() {
   sanitizeAll();
 
   const availabilities = availabilityFiles(join(DATA_DIR, "availability"));
-  const cancFile = latestFile(join(DATA_DIR, "cancellations"));
-  const revFile  = latestFile(join(DATA_DIR, "ehr-revenue"));
+  const revBundle  = readAllSheets(join(DATA_DIR, "ehr-revenue"));
+  const cancBundle = readAllSheets(join(DATA_DIR, "cancellations"));
 
-  if (!revFile)  { console.error("✗ No revenue file in reports-workspace/data/ehr-revenue/");   process.exit(1); }
-  if (!cancFile) { console.error("✗ No cancellations file in reports-workspace/data/cancellations/"); process.exit(1); }
+  if (!revBundle.files.length)  { console.error("✗ No revenue file in reports-workspace/data/ehr-revenue/");   process.exit(1); }
+  if (!cancBundle.files.length) { console.error("✗ No cancellations file in reports-workspace/data/cancellations/"); process.exit(1); }
   if (!availabilities["12mo"] && !availabilities["4mo"] && !availabilities["1mo"]) {
     console.error("✗ No availability files found in reports-workspace/data/availability/ (expected names containing '12 month', '4 month', or 'month snapshot')");
     process.exit(1);
   }
 
   console.log("Reading files:");
-  console.log("  revenue:      ", basename(revFile.path));
-  console.log("  cancellations:", basename(cancFile.path));
+  for (const f of revBundle.files)  console.log(`  revenue:       ${f.name}`);
+  for (const f of cancBundle.files) console.log(`  cancellations: ${f.name}`);
   for (const [k, f] of Object.entries(availabilities)) {
-    if (f) console.log(`  availability(${k}):`, basename(f.path));
+    if (f) console.log(`  availability(${k}): ${basename(f.path)}`);
   }
 
-  const revenue = readSheet(revFile.path);
-  const cancellations = readSheet(cancFile.path);
+  const revenue = revBundle.rows;
+  const cancellations = cancBundle.rows;
 
   const detected = detectPractitioners(revenue, cancellations, availabilities);
   const config = await confirmConfig(detected, loadConfig());
@@ -393,8 +404,8 @@ async function main() {
       inDiscipline: config.inDiscipline,
     },
     sourceFiles: {
-      revenue: basename(revFile.path),
-      cancellations: basename(cancFile.path),
+      revenue: revBundle.files.map(f => f.name),
+      cancellations: cancBundle.files.map(f => f.name),
       availability: Object.fromEntries(
         Object.entries(availabilities).filter(([, f]) => f).map(([k, f]) => [k, basename(f.path)])
       ),
