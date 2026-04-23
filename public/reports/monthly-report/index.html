@@ -324,10 +324,10 @@ function App() {
   }).filter(Boolean);
 
   // --- Section 1: "real cost of empty hours" — segment-driven, 12mo snapshot ---
-  // Matches the capacity report exactly: fill rate = booked/shift (apptHours/shiftHours)
-  // and $124/hr flat rate for lost-revenue math. Cancellation hours will be slightly
-  // higher than the capacity report's hardcoded numbers because this report reads from
-  // the dedicated cancellations export (more complete than the availability file alone).
+  // Fill rate = completedHours / shiftHours so the percentage matches the green
+  // "Completed" segment in the Schedule Utilization chart above. Empty% = cancelled +
+  // idle, so the two sum to 100 and the lost-revenue math (which counts cancelled
+  // hours as lost) lines up with the % shown.
   const LIST_RATE = 124;
   const massage12 = data.segments?.["all-massage"]?.snapshot?.["12mo"];
   const blendedRate = (() => {
@@ -349,8 +349,8 @@ function App() {
 
   const section1 = segmentSnap && segmentSnap.shiftHours ? {
     lostRevPerMonth: Math.round(((segmentSnap.idleHours + segmentSnap.cancelledHours) * avgRate) / 12),
-    emptyHoursPerMonth: Math.round(segmentSnap.idleHours / 12),
-    fillRate: segmentSnap.apptHours / segmentSnap.shiftHours,    // booked/shift (matches capacity report)
+    emptyHoursPerMonth: Math.round((segmentSnap.idleHours + segmentSnap.cancelledHours) / 12),
+    fillRate: segmentSnap.completedHours / segmentSnap.shiftHours,   // completed/shift (matches Schedule Utilization chart)
     avgRate: Math.round(avgRate),
     segLabel: segment.label || segmentKey,
     windowStart: segmentSnap.windowStart,
@@ -364,7 +364,7 @@ function App() {
     for (const name of (data.practitioners?.focus || [])) {
       const snap = data.practitionerUtilization?.[name]?.["12mo"];
       if (!snap || !snap.shiftHours) continue;
-      const rate = snap.apptHours / snap.shiftHours;  // booked/shift
+      const rate = snap.completedHours / snap.shiftHours;
       if (lowestFillRate == null || rate < lowestFillRate.rate) {
         lowestFillRate = { name, rate, firstName: name.split(" ")[0] };
       }
@@ -399,6 +399,33 @@ function App() {
   const minDate = allDates[0];
   const maxDate = allDates[allDates.length - 1];
 
+  // Preset windows. All anchored to maxDate (last day of available data) and
+  // clamped so we never request outside the dataset.
+  const applyPreset = (key) => {
+    if (!minDate || !maxDate) return;
+    const clamp = (d) => d < minDate ? minDate : (d > maxDate ? maxDate : d);
+    let s, e;
+    switch (key) {
+      case "7d":     e = maxDate; s = addDays(maxDate, -6);  break;
+      case "30d":    e = maxDate; s = addDays(maxDate, -29); break;
+      case "thismo": e = maxDate; s = firstOfMonth(maxDate); break;
+      case "lastmo": {
+        const lmFirst = shiftMonthFirst(maxDate, -1);
+        s = lmFirst; e = lastOfMonth(lmFirst);
+        break;
+      }
+      case "lastyr": {
+        const y = parseInt(maxDate.slice(0, 4), 10) - 1;
+        s = `${y}-01-01`; e = `${y}-12-31`;
+        break;
+      }
+      case "12mo": e = maxDate; s = addDays(shiftDateYear(maxDate, -1), 1); break;
+      default: return;
+    }
+    setDateStart(clamp(s));
+    setDateEnd(clamp(e));
+  };
+
   return (
     <div style={{ background:C.bg, minHeight:"100vh" }}>
 
@@ -423,6 +450,14 @@ function App() {
 
           <div className="rail-section">
             <div className="rail-label">Date range</div>
+            <div className="pill-row">
+              <button className="pill" onClick={() => applyPreset("7d")}>Last 7 days</button>
+              <button className="pill" onClick={() => applyPreset("30d")}>Last 30 days</button>
+              <button className="pill" onClick={() => applyPreset("thismo")}>This month</button>
+              <button className="pill" onClick={() => applyPreset("lastmo")}>Last month</button>
+              <button className="pill" onClick={() => applyPreset("12mo")}>Last 12 months</button>
+              <button className="pill" onClick={() => applyPreset("lastyr")}>Last year</button>
+            </div>
             <div className="date-label">Start</div>
             <input
               type="date"
@@ -560,8 +595,8 @@ function App() {
         {/* Placed after Schedule Utilization so the "why it matters" framing follows the chart. */}
         {section1 && (
           <div style={{ marginBottom:36 }}>
-            <Step n="1">The Real Cost of Empty Hours</Step>
-            <div style={{ fontSize:16, color:C.muted, marginBottom:14, marginLeft:40 }}>
+            <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:44, fontWeight:700, color:C.text, margin:"0 0 16px 0" }}>The Real Cost of Empty Hours</h2>
+            <div style={{ fontSize:16, color:C.muted, marginBottom:14 }}>
               {isAggregateSegment ? section1.segLabel : `${section1.segLabel}'s schedule`}
               {` · last 12 months (${fmtDate(section1.windowStart)} – ${fmtDate(section1.windowEnd)}) · at the standard $${section1.avgRate}/hr rate`}
               {blendedRate ? ` · realized blended rate: $${blendedRate.toFixed(0)}/hr` : ""}
@@ -577,7 +612,7 @@ function App() {
               <SectionKPI
                 value={`${section1.emptyHoursPerMonth}h`}
                 label="Empty hours / month"
-                sub={isAggregateSegment ? "Avg across the selected team over 12 months" : "Scheduled capacity never booked"}
+                sub={isAggregateSegment ? "Idle + cancelled hours, averaged across the team over 12 months" : "Idle + cancelled hours, monthly average"}
                 color={C.goldLight}
               />
               {isAggregateSegment && lowestFillRate ? (
@@ -599,14 +634,16 @@ function App() {
               )}
             </div>
 
-            {/* Per-therapist breakdown cards — only for aggregate views */}
+            {/* Per-therapist breakdown cards — only for aggregate views.
+                fillPct/emptyPct mirror the Schedule Utilization chart's segments
+                (completed vs. cancelled+idle) so the two read consistently. */}
             {isAggregateSegment && (
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:10 }}>
                 {(data.practitioners?.focus || []).map(name => {
                   const snap = data.practitionerUtilization?.[name]?.["12mo"];
                   if (!snap || !snap.shiftHours) return null;
-                  const fillPct = Math.round((snap.apptHours / snap.shiftHours) * 100);
-                  const idlePct = Math.round(((snap.idleHours + snap.cancelledHours) / snap.shiftHours) * 100);
+                  const fillPct = Math.round((snap.completedHours / snap.shiftHours) * 100);
+                  const emptyPct = Math.max(0, 100 - fillPct);
                   const idleRev = Math.round(((snap.idleHours + snap.cancelledHours) * avgRate) / 12);
                   const col = fillPct < 35 ? C.accent : fillPct < 55 ? C.gold : C.green;
                   const first = name.split(" ")[0];
@@ -615,12 +652,12 @@ function App() {
                       background: C.card, borderRadius: 10, padding: "14px 16px",
                       boxShadow: "0 1px 6px rgba(0,0,0,0.05)", borderLeft: `3px solid ${col}`,
                     }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                        <div style={{ fontSize:18, fontWeight:700, color:C.text }}>{first}</div>
-                        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:26, fontWeight:700, color:col }}>{fillPct}% booked</div>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:8 }}>
+                        <div style={{ fontSize:14, fontWeight:700, color:C.text }}>{first}</div>
+                        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:col, whiteSpace:"nowrap" }}>{fillPct}% completed</div>
                       </div>
-                      <div style={{ fontSize:15, color:C.muted, marginTop:4 }}>
-                        <strong style={{ color:C.text }}>{idlePct}% idle</strong> · ~${idleRev.toLocaleString()}/mo in unrealized revenue
+                      <div style={{ fontSize:11, color:C.muted, marginTop:4 }}>
+                        <strong style={{ color:C.text }}>{emptyPct}% empty</strong> · ~${idleRev.toLocaleString()}/mo in unrealized revenue
                       </div>
                     </div>
                   );
@@ -783,6 +820,25 @@ function fmtDate(d) {
   if (!d) return "—";
   const [y, m, day] = d.split("-").map(Number);
   return `${MONTH_LABELS[m-1]} ${day}, ${y}`;
+}
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function firstOfMonth(dateStr) { return dateStr.slice(0, 7) + "-01"; }
+function lastOfMonth(dateStr) {
+  const [y, m] = dateStr.split("-").map(Number);
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  return `${y}-${String(m).padStart(2,"0")}-${String(last).padStart(2,"0")}`;
+}
+function shiftMonthFirst(dateStr, delta) {
+  const [y, m] = dateStr.split("-").map(Number);
+  const total = (y * 12 + (m - 1)) + delta;
+  const ny = Math.floor(total / 12);
+  const nm = (total % 12) + 1;
+  return `${ny}-${String(nm).padStart(2,"0")}-01`;
 }
 
 function Card({ title, subtitle, children }) {
