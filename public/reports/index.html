@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Reports · Maximum Massage Therapy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F2EFE9; font-family: 'DM Sans', sans-serif; color: #1A1A1A; }
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #B8913F; margin-bottom: 14px; }
+  .h1 { font-family: 'Cormorant Garamond', serif; font-size: 44px; font-weight: 700; line-height: 1.15; margin-bottom: 14px; }
+  .lede { font-size: 15px; color: #6B6459; line-height: 1.7; max-width: 620px; margin-bottom: 44px; }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+
+  .card {
+    background: #FFFFFF; border-radius: 16px; padding: 26px 28px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+    border-left: 4px solid #2D5242;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: block;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,0,0,0.09); }
+  .card.evergreen { border-left-color: #B8913F; }
+  .card.snapshot { border-left-color: #C4653A; }
+
+  .card-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+  }
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px;
+    background: #EAF0EC; color: #2D5242;
+  }
+  .badge.evergreen { background: #F5EDD8; color: #B8913F; }
+  .badge.snapshot  { background: #FAF0EB; color: #C4653A; }
+  .month {
+    font-size: 12px; font-weight: 600; color: #6B6459;
+    letter-spacing: 0.04em;
+  }
+
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px; font-weight: 700; line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .card-sub {
+    font-size: 14px; color: #6B6459; line-height: 1.65;
+    margin-bottom: 14px;
+  }
+  .card-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #2D5242;
+  }
+  .card-cta::after { content: "→"; transition: transform 0.15s ease; }
+  .card:hover .card-cta::after { transform: translateX(3px); }
+
+  .footer {
+    margin-top: 56px; font-size: 12px; color: #6B6459;
+    line-height: 1.7; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Reports · Maximum Massage Therapy</div>
+  <h1 class="h1">Report library</h1>
+  <p class="lede">
+    Working dashboards and one-off analyses prepared by Smart Practitioner
+    for Maximum Massage Therapy. Pick a report below to open it. Some are
+    point-in-time snapshots; others refresh on a schedule.
+  </p>
+
+  <div class="grid">
+
+    <a href="capacity/" class="card snapshot">
+      <div class="card-meta">
+        <span class="badge snapshot">Snapshot</span>
+        <span class="month">April 2026</span>
+      </div>
+      <div class="card-title">Schedule Capacity &amp; The Real Cost of Empty Hours</div>
+      <div class="card-sub">
+        Where the booking shortfall is across the four focus therapists, what
+        an unfilled chair costs in monthly revenue, and why a $49 intro offer
+        is the most leverage-able next move. Kicked off the engagement.
+      </div>
+      <span class="card-cta">Open report</span>
+    </a>
+
+    <a href="quiz-insights/" class="card snapshot">
+      <div class="card-meta">
+        <span class="badge snapshot">Snapshot</span>
+        <span class="month">April 2026</span>
+      </div>
+      <div class="card-title">Quiz Funnel Insights — Who's Coming Through</div>
+      <div class="card-sub">
+        Intent, pain profile, and buyer segments derived from quiz responses
+        on paid Google Ads traffic. Identifies the three buyer segments and
+        what the landing-page copy needs to do for each one.
+      </div>
+      <span class="card-cta">Open report</span>
+    </a>
+
+    <a href="monthly-report/" class="card evergreen">
+      <div class="card-meta">
+        <span class="badge evergreen">Evergreen · Updates monthly</span>
+        <span class="month">Through April 2026</span>
+      </div>
+      <div class="card-title">Monthly Performance — Revenue, Bookings &amp; Cancellations</div>
+      <div class="card-sub">
+        Same URL, fresh numbers each month. Filterable by date range and by
+        therapist segment (whole clinic / all massage / focus four / per
+        practitioner), with Schedule Utilization, real-cost-of-empty-hours,
+        and YoY trends.
+      </div>
+      <span class="card-cta">Open report</span>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    Prepared by Smart Practitioner for Maximum Massage Therapy.<br/>
+    Reports are private — please don't share these URLs publicly.
+  </div>
+</div>
+</body>
+</html>

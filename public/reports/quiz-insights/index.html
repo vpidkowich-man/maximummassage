@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Quiz Funnel Insights · Maximum Massage Therapy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script data-cfasync="false" src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script data-cfasync="false" src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script data-cfasync="false" src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
+<script data-cfasync="false" src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script data-cfasync="false" src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.min.js"></script>
+
+<!--
+  ─────────────────────────────────────────────────────────────
+  GOOGLE SHEETS LIVE-UPDATE SETUP (optional)
+
+  To connect this report to a live Google Sheet:
+  1. In Google Sheets → File → Share → Publish to web
+  2. Choose "Entire document" and "CSV" format → Publish
+  3. Copy the URL it gives you (ends in ...output=csv)
+  4. Paste it into SHEET_CSV_URL below (replacing null)
+  5. The report will now auto-refresh from the sheet on every load
+
+  Leave as null to use the embedded static data below.
+  ─────────────────────────────────────────────────────────────
+-->
+<script>
+  const SHEET_CSV_URL = null;
+  // Example: const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/YOUR_ID/export?format=csv";
+</script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F2EFE9; font-family: 'DM Sans', sans-serif; }
+  button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+  a { color: inherit; }
+  .loading { display:flex; align-items:center; justify-content:center; height:100vh; font-family:'DM Sans',sans-serif; color:#6B6459; font-size:14px; gap:10px; }
+  .spinner { width:20px; height:20px; border:2px solid #EDE9E3; border-top-color:#2D5242; border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .back-link { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#6B6459; text-decoration:none; margin-bottom:18px; letter-spacing:0.04em; text-transform:uppercase; }
+  .back-link:hover { color:#2D5242; }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading"><div class="spinner"></div> Loading insights…</div></div>
+
+<script type="text/babel" data-cfasync="false">
+const { useState, useEffect } = React;
+const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } = Recharts;
+
+const C = {
+  bg:"#F2EFE9", card:"#FFFFFF", green:"#2D5242", greenLight:"#3D6B56",
+  greenPale:"#EAF0EC", gold:"#B8913F", goldLight:"#F5EDD8",
+  text:"#1A1A1A", muted:"#6B6459", accent:"#C4653A", accentLight:"#FAF0EB",
+  lavender:"#7B6FA0", lavenderLight:"#F0EEF7",
+  teal:"#3A7A7A", tealLight:"#E8F4F4",
+  sky:"#4A7FA5", skyLight:"#E8F2F9",
+  empty:"#D9CFC3",
+};
+
+const TRIED_COLORS = {
+  "Massage Therapy":              C.green,
+  "Chiropractic or osteopathy":   C.lavender,
+  "Medication or painkillers":    C.accent,
+  "Physiotherapy":                C.teal,
+  "Other therapies or self-care": C.gold,
+  "I haven't tried anything yet": C.sky,
+};
+
+// ── STATIC FALLBACK DATA ─────────────────────────────────────────────────────
+const STATIC_ROWS = [
+  { Q1:"Recovery from an injury",              Q2:"Recent injury, Muscle tension, Chronic pain",                                              pain:8,  Q3:"Physiotherapy, Massage Therapy, Medication or painkillers, Chiropractic or osteopathy", Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Muscle tension, Chronic pain",                                                             pain:6,  Q3:"Physiotherapy, Massage Therapy",                                                         Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"massage near me" },
+  { Q1:"Other",                                Q2:"Pregnancy or post-natal recovery, Stress and anxiety",                                     pain:5,  Q3:"Chiropractic or osteopathy, Massage Therapy, Physiotherapy",                             Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"registered massage therapist calgary" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety, Chronic pain, Muscle tension",                                         pain:4,  Q3:"Chiropractic or osteopathy, Massage Therapy",                                            Q4:"Reduce stress and anxiety",                  source:"paid", keyword:"massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Muscle tension",                                                                           pain:8,  Q3:"I haven't tried anything yet",                                                           Q4:"Help me relax and de-stress",                source:"paid", keyword:"massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Chronic pain, Stress and anxiety",                                                         pain:5,  Q3:"Massage Therapy",                                                                        Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Chronic pain",                                                                             pain:6,  Q3:"Massage Therapy",                                                                        Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:5,  Q3:"Physiotherapy, Medication or painkillers",                                               Q4:"Improve mobility and flexibility",           source:"paid", keyword:"headache massage calgary" },
+  { Q1:"Relaxation and stress relief",         Q2:"Chronic pain, Stress and anxiety, Recent injury, Pregnancy or post-natal recovery, Muscle tension", pain:6, Q3:"I haven't tried anything yet, Massage Therapy, Chiropractic or osteopathy", Q4:"Help me relax and de-stress", source:"paid", keyword:"massage near me" },
+  { Q1:"Pain management",                      Q2:"Stress and anxiety",                                                                       pain:6,  Q3:"Medication or painkillers",                                                              Q4:"Reduce stress and anxiety",                  source:"paid", keyword:"massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:5,  Q3:"Massage Therapy",                                                                        Q4:"Help me relax and de-stress",                source:"paid", keyword:"massage therapy calgary" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:5,  Q3:"Massage Therapy",                                                                        Q4:"Reduce stress and anxiety",                  source:"paid", keyword:"massage near me" },
+  { Q1:"Pain management",                      Q2:"Muscle tension",                                                                           pain:7,  Q3:"Medication or painkillers",                                                              Q4:"Help me relax and de-stress",                source:"paid", keyword:"licensed massage therapist calgary" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:10, Q3:"Massage Therapy",                                                                        Q4:"Help me relax and de-stress",                source:"paid", keyword:"massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Muscle tension",                                                                           pain:10, Q3:"Massage Therapy",                                                                        Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"massage near me" },
+  { Q1:"Pain management",                      Q2:"Muscle tension",                                                                           pain:7,  Q3:"Physiotherapy, Chiropractic or osteopathy, Massage Therapy, Medication or painkillers, Other therapies or self-care", Q4:"Improve mobility and flexibility", source:"paid", keyword:"book massage calgary" },
+  { Q1:"Relaxation and stress relief",         Q2:"Muscle tension",                                                                           pain:5,  Q3:"Chiropractic or osteopathy, Medication or painkillers, Other therapies or self-care",    Q4:"Help me relax and de-stress",                source:"paid", keyword:"deep muscle massage near me" },
+  { Q1:"Pain management",                      Q2:"Chronic pain",                                                                             pain:5,  Q3:"Physiotherapy",                                                                          Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"massage in calgary" },
+  { Q1:"Pain management",                      Q2:"Recent injury, Muscle tension",                                                            pain:4,  Q3:"Physiotherapy",                                                                          Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"deep muscle massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:4,  Q3:"Massage Therapy, Other therapies or self-care",                                          Q4:"Help me relax and de-stress",                source:"organic", keyword:"" },
+  { Q1:"Pain management",                      Q2:"Recent injury",                                                                            pain:7,  Q3:"I haven't tried anything yet, Medication or painkillers",                                Q4:"Reduce pain and discomfort",                 source:"paid", keyword:"massage near me" },
+  { Q1:"Other",                                Q2:"Muscle tension",                                                                           pain:4,  Q3:"I haven't tried anything yet",                                                           Q4:"Improve mobility and flexibility",           source:"paid", keyword:"deep tissue massage calgary" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:6,  Q3:"Massage Therapy",                                                                        Q4:"Improve mobility and flexibility",           source:"paid", keyword:"deep muscle massage near me" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:3,  Q3:"Massage Therapy",                                                                        Q4:"Help me relax and de-stress",                source:"paid", keyword:"best deep tissue massage calgary" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:0,  Q3:"Massage Therapy",                                                                        Q4:"Help me relax and de-stress",                source:"paid", keyword:"massage near me" },
+  { Q1:"Pain management",                      Q2:"Chronic pain, Stress and anxiety, Muscle tension",                                         pain:7,  Q3:"Physiotherapy, Chiropractic or osteopathy, Massage Therapy, Medication or painkillers, Other therapies or self-care", Q4:"Help me relax and de-stress", source:"paid", keyword:"relaxation massage calgary" },
+  { Q1:"Pain management",                      Q2:"Muscle tension",                                                                           pain:9,  Q3:"Chiropractic or osteopathy, Massage Therapy",                                            Q4:"Improve mobility and flexibility",           source:"paid", keyword:"relaxation massage calgary" },
+  { Q1:"Relaxation and stress relief",         Q2:"Muscle tension",                                                                           pain:4,  Q3:"Massage Therapy",                                                                        Q4:"Improve mobility and flexibility",           source:"organic", keyword:"" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:3,  Q3:"Other therapies or self-care",                                                           Q4:"Support long-term recovery and performance", source:"organic", keyword:"" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety",                                                                       pain:3,  Q3:"Massage Therapy",                                                                        Q4:"Help me relax and de-stress",                source:"organic", keyword:"" },
+  { Q1:"Relaxation and stress relief",         Q2:"Chronic pain, Stress and anxiety, Muscle tension",                                         pain:7,  Q3:"Chiropractic or osteopathy",                                                             Q4:"Help me relax and de-stress",                source:"organic", keyword:"" },
+  { Q1:"Preparation for childbirth/post-natal",Q2:"Pregnancy or post-natal recovery, Muscle tension",                                        pain:3,  Q3:"I haven't tried anything yet, Other therapies or self-care",                             Q4:"Help me relax and de-stress",                source:"organic", keyword:"" },
+  { Q1:"Other",                                Q2:"Stress and anxiety, Recent injury, Muscle tension",                                        pain:7,  Q3:"Physiotherapy, Massage Therapy, Medication or painkillers, Other therapies or self-care", Q4:"Help me relax and de-stress",               source:"organic", keyword:"" },
+  { Q1:"Pain management",                      Q2:"Chronic pain, Muscle tension, Stress and anxiety",                                         pain:8,  Q3:"Massage Therapy, Chiropractic or osteopathy",                                            Q4:"Reduce pain and discomfort",                 source:"organic", keyword:"" },
+  { Q1:"Pain management",                      Q2:"Chronic pain",                                                                             pain:8,  Q3:"Physiotherapy, Massage Therapy, Medication or painkillers, Chiropractic or osteopathy",  Q4:"Support long-term recovery and performance", source:"organic", keyword:"" },
+  { Q1:"Relaxation and stress relief",         Q2:"Chronic pain, Recent injury",                                                              pain:10, Q3:"Chiropractic or osteopathy",                                                             Q4:"Help me relax and de-stress",                source:"organic", keyword:"" },
+  { Q1:"Recovery from an injury",              Q2:"Chronic pain, Stress and anxiety",                                                         pain:9,  Q3:"Physiotherapy, Chiropractic or osteopathy, Massage Therapy, Medication or painkillers",  Q4:"Help me relax and de-stress",                source:"organic", keyword:"" },
+  { Q1:"Relaxation and stress relief",         Q2:"Stress and anxiety, Chronic pain",                                                         pain:8,  Q3:"Medication or painkillers, Other therapies or self-care",                                Q4:"Support long-term recovery and performance", source:"organic", keyword:"" },
+];
+
+// ── CSV PARSING ──────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.replace(/^"|"$/g,'').trim());
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = vals[i] || '');
+    return obj;
+  }).filter(r => Object.values(r).some(v => v));
+}
+
+function normalizeRow(r) {
+  if (r.Q1 && typeof r.pain !== 'undefined') return r;
+  const keys = Object.keys(r);
+  return {
+    Q1: r[keys[10]] || '',
+    Q2: r[keys[11]] || '',
+    pain: parseFloat(r[keys[12]]) || 0,
+    Q3: r[keys[13]] || '',
+    Q4: r[keys[14]] || '',
+    source: r[keys[3]] ? 'paid' : 'organic',
+    keyword: r[keys[7]] || '',
+  };
+}
+
+// ── ANALYSIS ─────────────────────────────────────────────────────────────────
+function analyze(rows) {
+  const n = rows.length;
+  if (n === 0) return null;
+  const count = arr => arr.reduce((a,v)=>{ a[v]=(a[v]||0)+1; return a; }, {});
+  const explode = key => rows.flatMap(r=>(r[key]||'').split(', ').map(s=>s.trim()).filter(Boolean));
+  const q1 = count(rows.map(r=>r.Q1));
+  const q4 = count(rows.map(r=>r.Q4));
+  const conditions = count(explode('Q2'));
+  const tried = count(explode('Q3'));
+  const painAvg = (rows.reduce((s,r)=>s+r.pain,0)/n).toFixed(1);
+  const highPain = rows.filter(r=>r.pain>=7).length;
+  const midPain  = rows.filter(r=>r.pain>=4&&r.pain<=6).length;
+  const lowPain  = rows.filter(r=>r.pain<=3).length;
+  const relaxers = rows.filter(r=>r.Q1==='Relaxation and stress relief');
+  const relaxWithPainBody = relaxers.filter(r=>r.Q2.includes('Chronic pain')||r.Q2.includes('Muscle tension')||r.Q2.includes('Recent injury'));
+  const relaxHighPain = relaxers.filter(r=>r.pain>=7);
+  const painMgmt = rows.filter(r=>r.Q1==='Pain management'||r.Q1==='Recovery from an injury');
+  const veterans = rows.filter(r=>(r.Q3||'').split(', ').filter(s=>s.trim()).length >= 2);
+  const firstTimers = rows.filter(r=>(r.Q3||'').includes("haven't tried anything yet"));
+  const keywords = count(rows.map(r=>r.keyword).filter(Boolean));
+  const paidCount = rows.filter(r=>r.source==='paid').length;
+  const organicCount = rows.filter(r=>r.source==='organic').length;
+  return { n, q1, q4, conditions, tried, painAvg, highPain, midPain, lowPain,
+    relaxersN: relaxers.length, relaxWithPainBody: relaxWithPainBody.length,
+    relaxHighPain: relaxHighPain.length,
+    relaxAvgPain: (relaxers.reduce((s,r)=>s+r.pain,0)/relaxers.length).toFixed(1),
+    painMgmtN: painMgmt.length,
+    painMgmtAvgPain: (painMgmt.reduce((s,r)=>s+r.pain,0)/painMgmt.length).toFixed(1),
+    veteransN: veterans.length,
+    firstTimersN: firstTimers.length,
+    paidCount, organicCount, keywords };
+}
+
+// ── COMPONENTS ───────────────────────────────────────────────────────────────
+const Step = ({n,children}) => (
+  <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}>
+    <div style={{width:30,height:30,borderRadius:"50%",background:C.green,color:"#fff",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{n}</div>
+    <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:700,color:C.text,margin:0}}>{children}</h2>
+  </div>
+);
+
+const KPI = ({label,value,sub,color,accent}) => (
+  <div style={{background:color||C.card,borderRadius:12,padding:"20px 16px",flex:1,minWidth:120,boxShadow:"0 2px 10px rgba(0,0,0,0.06)",borderTop:accent?`3px solid ${accent}`:undefined}}>
+    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:34,fontWeight:700,color:accent||C.green,lineHeight:1,marginBottom:6}}>{value}</div>
+    <div style={{fontSize:13,fontWeight:700,color:C.text,letterSpacing:"0.03em",textTransform:"uppercase",marginBottom:sub?4:0}}>{label}</div>
+    {sub&&<div style={{fontSize:12,color:C.muted,lineHeight:1.5}}>{sub}</div>}
+  </div>
+);
+
+const Card = ({children,style={}}) => (
+  <div style={{background:C.card,borderRadius:14,padding:"22px 20px",boxShadow:"0 2px 10px rgba(0,0,0,0.06)",...style}}>{children}</div>
+);
+
+const HBar = ({label,value,max,color,tag,tagColor}) => (
+  <div style={{marginBottom:13}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,flex:1,minWidth:0}}>
+        <span style={{fontSize:13,color:C.text,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{label}</span>
+        {tag&&<span style={{display:"inline-block",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700,background:tagColor||C.greenPale,color:"#fff",flexShrink:0}}>{tag}</span>}
+      </div>
+      <span style={{fontSize:13,fontWeight:700,color:color||C.green,marginLeft:8,flexShrink:0}}>{value}</span>
+    </div>
+    <div style={{height:8,background:"#EDE9E3",borderRadius:4,overflow:"hidden"}}>
+      <div style={{height:"100%",width:`${Math.round((value/max)*100)}%`,background:color||C.green,borderRadius:4}}/>
+    </div>
+  </div>
+);
+
+const InsightBox = ({title,children,color}) => (
+  <div style={{background:color?`${color}15`:C.accentLight,borderRadius:10,padding:"14px 16px",borderLeft:`3px solid ${color||C.accent}`,marginTop:14}}>
+    {title&&<div style={{fontSize:13,fontWeight:700,color:color||C.accent,marginBottom:5}}>{title}</div>}
+    <div style={{fontSize:13,color:C.muted,lineHeight:1.7}}>{children}</div>
+  </div>
+);
+
+const HighlightQuote = ({children}) => (
+  <div style={{background:C.greenPale,borderRadius:12,padding:"20px 22px",borderLeft:`4px solid ${C.green}`,margin:"16px 0"}}>
+    <div style={{fontSize:15,fontWeight:600,color:C.green,lineHeight:1.7,fontStyle:"italic"}}>{children}</div>
+  </div>
+);
+
+const SegCard = ({label,pct,avgPain,tagline,detail,color,icon}) => (
+  <div style={{background:C.card,borderRadius:12,padding:"18px 16px",flex:1,minWidth:160,boxShadow:"0 1px 8px rgba(0,0,0,0.06)",borderTop:`3px solid ${color}`}}>
+    <div style={{fontSize:22,marginBottom:7}}>{icon}</div>
+    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:700,color,lineHeight:1,marginBottom:4}}>{pct}%</div>
+    <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:4}}>{label}</div>
+    <div style={{fontSize:12,color:C.muted,marginBottom:10,lineHeight:1.55}}>{tagline}</div>
+    <div style={{fontSize:12,color:C.green,fontWeight:600,background:C.greenPale,borderRadius:6,padding:"4px 8px",display:"inline-block",marginBottom:8}}>Avg pain: {avgPain}/10</div>
+    <div style={{fontSize:12,color:C.muted,lineHeight:1.6}}>{detail}</div>
+  </div>
+);
+
+const TT = ({active,payload,label}) => {
+  if(!active||!payload?.length) return null;
+  return (
+    <div style={{background:C.green,color:"#fff",borderRadius:8,padding:"9px 13px",fontSize:13,fontFamily:"'DM Sans',sans-serif",boxShadow:"0 4px 16px rgba(0,0,0,0.2)"}}>
+      <div style={{fontWeight:700,marginBottom:3}}>{label||payload[0].name}</div>
+      <div>{payload[0].value} respondents</div>
+    </div>
+  );
+};
+
+// ── MAIN APP ─────────────────────────────────────────────────────────────────
+function App() {
+  const [data, setData] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoad] = useState(true);
+  const [liveMode, setLive] = useState(false);
+  const [lastFetch, setLF] = useState(null);
+
+  useEffect(() => {
+    async function load() {
+      if (SHEET_CSV_URL) {
+        try {
+          const res = await fetch(SHEET_CSV_URL);
+          const text = await res.text();
+          const parsed = parseCSV(text).map(normalizeRow).filter(r => r.Q1);
+          setData(parsed);
+          setStats(analyze(parsed));
+          setLive(true);
+          setLF(new Date().toLocaleTimeString());
+        } catch(e) {
+          console.warn("Sheet fetch failed, using static data", e);
+          setData(STATIC_ROWS);
+          setStats(analyze(STATIC_ROWS));
+        }
+      } else {
+        setData(STATIC_ROWS);
+        setStats(analyze(STATIC_ROWS));
+      }
+      setLoad(false);
+    }
+    load();
+  }, []);
+
+  if (loading || !stats) return <div className="loading"><div className="spinner"/>Loading insights…</div>;
+
+  const { n, q1, q4, conditions, tried, painAvg, highPain, midPain, lowPain,
+    relaxersN, relaxWithPainBody, relaxHighPain, relaxAvgPain,
+    painMgmtN, painMgmtAvgPain, veteransN, firstTimersN,
+    paidCount, organicCount, keywords } = stats;
+
+  const q1Data = Object.entries(q1).sort((a,b)=>b[1]-a[1]).map(([name,value])=>({
+    name: name==="Relaxation and stress relief"?"Relaxation / Stress":name==="Pain management"?"Pain Management":name==="Recovery from an injury"?"Injury Recovery":name, value
+  }));
+  const condData = Object.entries(conditions).sort((a,b)=>b[1]-a[1]).map(([name,value])=>({name,value}));
+  const goalData = Object.entries(q4).sort((a,b)=>b[1]-a[1]).map(([name,value])=>({name,value}));
+  const triedData = Object.entries(tried).sort((a,b)=>b[1]-a[1]).map(([name,value])=>({name,value}));
+  const kwData = Object.entries(keywords).sort((a,b)=>b[1]-a[1]).slice(0,7).map(([name,value])=>({name,value}));
+
+  const painBuckets = [
+    {name:"Low (0–3)",value:lowPain,fill:"#A8C5B5"},
+    {name:"Mid (4–6)",value:midPain,fill:C.gold},
+    {name:"High (7–10)",value:highPain,fill:C.accent},
+  ];
+
+  const mnmRows = data.filter(r=>r.keyword==="massage near me");
+  const mnmAvgPain = mnmRows.length ? (mnmRows.reduce((s,r)=>s+r.pain,0)/mnmRows.length).toFixed(1) : "—";
+
+  const trueRelaxRows = data.filter(r=>r.Q1==='Relaxation and stress relief'&&!r.Q2.includes('Chronic pain')&&!r.Q2.includes('Muscle tension')&&!r.Q2.includes('Recent injury'));
+  const trueRelaxN = trueRelaxRows.length;
+  const trueRelaxAvgPain = trueRelaxN ? (trueRelaxRows.reduce((s,r)=>s+r.pain,0)/trueRelaxN).toFixed(1) : "—";
+
+  return (
+    <div style={{background:C.bg,minHeight:"100vh",padding:"36px 20px",fontFamily:"'DM Sans',sans-serif"}}>
+      <div style={{maxWidth:720,margin:"0 auto"}}>
+
+        <a href="../" className="back-link">← All reports</a>
+
+        {/* HEADER */}
+        <div style={{marginBottom:36,borderLeft:`4px solid ${C.green}`,paddingLeft:20}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:C.gold,marginBottom:10}}>Quiz Funnel Insights · Smart Practitioner</div>
+              <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:34,fontWeight:700,color:C.text,lineHeight:1.2,margin:"0 0 12px"}}>Who's Coming Through<br/>the Funnel?</h1>
+              <p style={{fontSize:14,color:C.muted,lineHeight:1.75,margin:0}}>Maximum Massage Therapy · <strong style={{color:C.text}}>{n} respondents</strong> · Intent, pain profile & buyer segments</p>
+            </div>
+            {liveMode && (
+              <div style={{background:C.greenPale,borderRadius:10,padding:"10px 14px",fontSize:11,color:C.green,fontWeight:600,textAlign:"right",flexShrink:0}}>
+                <div style={{marginBottom:2}}>🟢 Live from Google Sheets</div>
+                <div style={{color:C.muted,fontWeight:400}}>Updated {lastFetch}</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* HEADLINE FINDING */}
+        <div style={{background:C.green,borderRadius:14,padding:"26px 26px",color:"#fff",marginBottom:32}}>
+          <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:C.goldLight,marginBottom:10}}>The headline finding</div>
+          <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:21,lineHeight:1.55,margin:"0 0 14px",fontWeight:600}}>
+            {Math.round(relaxersN/n*100)}% say they want "relaxation" — but the average pain score across all respondents is {painAvg}/10.
+          </p>
+          <p style={{fontSize:13,color:"rgba(255,255,255,0.8)",margin:0,lineHeight:1.75}}>
+            Of those relaxation-seekers: <strong style={{color:"#fff"}}>{relaxWithPainBody}</strong> report muscle tension or chronic pain as an active condition, and <strong style={{color:"#fff"}}>{relaxHighPain}</strong> score their pain at 7 or higher. The word "relaxation" is how people self-describe — the underlying need is often clinical.
+          </p>
+        </div>
+
+        {/* KPIs */}
+        <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:32}}>
+          <KPI value={n} label="Respondents" sub="Unique quiz completions"/>
+          <KPI value={`${painAvg}/10`} label="Avg pain score" sub="Across all — not just pain seekers" color={C.accentLight} accent={C.accent}/>
+          <KPI value={`${Math.round(highPain/n*100)}%`} label="Pain score 7+" sub="Even among 'relaxation' seekers" color="#FAF0EB" accent={C.accent}/>
+          <KPI value={`${Math.round(veteransN/n*100)}%`} label="Treatment veterans" sub="Already tried 2+ modalities" color={C.greenPale} accent={C.green}/>
+        </div>
+
+        {/* S1: SEGMENTS */}
+        <div style={{marginBottom:32}}>
+          <Step n="1">The Three Buyer Segments</Step>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+            <SegCard label="Disguised Pain Patient" pct={Math.round(relaxWithPainBody/n*100)} avgPain={relaxAvgPain}
+              tagline="Said 'relaxation' but reports chronic pain or muscle tension"
+              detail={`${relaxWithPainBody} of ${relaxersN} relaxation-seekers have underlying pain conditions. They self-minimise — the right copy meets them where they are, then elevates.`}
+              color={C.accent} icon="🥸"/>
+            <SegCard label="Explicit Pain Seeker" pct={Math.round(painMgmtN/n*100)} avgPain={painMgmtAvgPain}
+              tagline="Came in specifically for pain management or injury recovery"
+              detail="Highest avg pain of any group. Most are treatment veterans. They know what they need and are ready to commit — lowest friction to book."
+              color={C.green} icon="🎯"/>
+            <SegCard label="True Relaxation Client" pct={Math.round(trueRelaxN/n*100)} avgPain={trueRelaxAvgPain}
+              tagline="Low pain, stress-driven, comfort-seeking"
+              detail="Motivated by stress and anxiety, not physical symptoms. Most price-sensitive. Most likely to convert on the $49 intro offer."
+              color={C.gold} icon="🧘"/>
+          </div>
+          <InsightBox title="What this means for the campaigns">
+            The data tells us why the quiz and landing page have to do the heavy lifting that the keywords can't. Two-thirds of paid traffic is on generic terms ("massage near me", "massage in calgary") that carry no intent signal — meaning we can't sort these visitors into the right segment before they click. The quiz is doing that sorting after the click. The two-campaign split still makes sense for keywords that genuinely carry intent (clinical modifiers vs. "relaxation"), but for the bulk of traffic, the landing page has to be flexible enough to recognise and route a Disguised Pain Patient just as well as a True Relaxation Client.
+          </InsightBox>
+        </div>
+
+        {/* S2: Q1 */}
+        <div style={{marginBottom:32}}>
+          <Step n="2">What People Say They Want (Q1)</Step>
+          <Card>
+            <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>Primary reason for seeking massage</div>
+            <div style={{fontSize:12,color:C.muted,marginBottom:18}}>Self-reported — read alongside section 1</div>
+            {q1Data.map(d=>(
+              <HBar key={d.name} label={d.name} value={d.value} max={n}
+                color={d.name.includes("Relaxation")?C.gold:d.name.includes("Pain")||d.name.includes("Injury")?C.green:C.empty}
+                tag={d.name.includes("Relaxation")?`${Math.round(d.value/n*100)}%`:undefined}
+                tagColor={d.name.includes("Relaxation")?C.gold:undefined}
+              />
+            ))}
+            <InsightBox title="The self-report gap" color={C.gold}>
+              {Math.round((q1["Relaxation and stress relief"]||0)/n*100)}% chose "relaxation" as their primary reason — but pain scores and conditions reveal a more complex picture. This is not dishonesty; it's how people frame their need before a clinical context validates it.
+            </InsightBox>
+          </Card>
+        </div>
+
+        {/* S3: CONDITIONS */}
+        <div style={{marginBottom:32}}>
+          <Step n="3">What Their Bodies Are Actually Dealing With (Q2)</Step>
+          <Card>
+            <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>Active conditions reported (multi-select)</div>
+            <div style={{fontSize:12,color:C.muted,marginBottom:18}}>Total selections across {n} respondents</div>
+            {condData.map(d=>(
+              <HBar key={d.name} label={d.name} value={d.value} max={condData[0].value}
+                color={d.name==="Stress and anxiety"?C.lavender:d.name==="Muscle tension"?C.green:d.name==="Chronic pain"?C.accent:d.name==="Recent injury"?C.gold:C.sky}
+              />
+            ))}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:16}}>
+              <div style={{background:C.lavenderLight,borderRadius:10,padding:"14px 16px"}}>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:26,fontWeight:700,color:C.lavender}}>{conditions["Stress and anxiety"]||0}</div>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Stress & Anxiety</div>
+                <div style={{fontSize:12,color:C.muted,marginTop:3}}>Most common — crosses all segments</div>
+              </div>
+              <div style={{background:C.accentLight,borderRadius:10,padding:"14px 16px"}}>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:26,fontWeight:700,color:C.accent}}>{(conditions["Muscle tension"]||0)+(conditions["Chronic pain"]||0)}</div>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Physical Pain Conditions</div>
+                <div style={{fontSize:12,color:C.muted,marginTop:3}}>Muscle tension + chronic pain combined</div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* S4: PAIN SCORES */}
+        <div style={{marginBottom:32}}>
+          <Step n="4">Pain Distribution</Step>
+          <Card>
+            <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>Pain score on a scale of 0–10</div>
+            <div style={{fontSize:12,color:C.muted,marginBottom:18}}>How respondents rated their current discomfort</div>
+            <ResponsiveContainer width="100%" height={175}>
+              <BarChart data={painBuckets} margin={{top:8,right:8,left:-10,bottom:0}} barSize={64}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E3" vertical={false}/>
+                <XAxis dataKey="name" tick={{fontFamily:"'DM Sans',sans-serif",fontSize:12,fill:C.muted}} axisLine={false} tickLine={false}/>
+                <YAxis tick={{fontFamily:"'DM Sans',sans-serif",fontSize:11,fill:C.muted}} axisLine={false} tickLine={false}/>
+                <Tooltip content={<TT/>} cursor={{fill:"rgba(0,0,0,0.03)"}}/>
+                <Bar dataKey="value" radius={[6,6,0,0]}>
+                  {painBuckets.map((d,i)=><Cell key={i} fill={d.fill}/>)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <InsightBox title={`${Math.round(highPain/n*100)}% are in genuine pain`} color={C.accent}>
+              Nearly half of all respondents score pain at 7 or above. This is not a spa audience — they want relief. Landing page copy should acknowledge this reality even for people who entered via a "relaxation" keyword.
+            </InsightBox>
+          </Card>
+        </div>
+
+        {/* S5: TREATMENT HISTORY */}
+        <div style={{marginBottom:32}}>
+          <Step n="5">What They've Already Tried (Q3)</Step>
+          <Card>
+            <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>Previous treatments (multi-select)</div>
+            <div style={{fontSize:12,color:C.muted,marginBottom:18}}>This audience is not new to the healthcare system</div>
+            {triedData.map(d=>(
+              <HBar key={d.name} label={d.name} value={d.value} max={triedData[0].value}
+                color={TRIED_COLORS[d.name]||C.empty}
+              />
+            ))}
+
+            <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:14,marginBottom:4}}>
+              {triedData.map(d=>(
+                <div key={d.name} style={{display:"flex",alignItems:"center",gap:5}}>
+                  <div style={{width:10,height:10,borderRadius:2,background:TRIED_COLORS[d.name]||C.empty,flexShrink:0}}/>
+                  <span style={{fontSize:11,color:C.muted}}>{d.name}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{display:"flex",gap:10,marginTop:16,flexWrap:"wrap"}}>
+              <div style={{background:C.greenPale,borderRadius:10,padding:"14px 16px",flex:1,minWidth:140}}>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:26,fontWeight:700,color:C.green}}>{veteransN}</div>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Treatment Veterans</div>
+                <div style={{fontSize:12,color:C.muted,marginTop:3}}>Tried 2+ modalities — {Math.round(veteransN/n*100)}% of respondents</div>
+              </div>
+              <div style={{background:C.skyLight,borderRadius:10,padding:"14px 16px",flex:1,minWidth:140}}>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:26,fontWeight:700,color:C.sky}}>{firstTimersN}</div>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Haven't Tried Anything Yet</div>
+                <div style={{fontSize:12,color:C.muted,marginTop:3}}>Selected this as one of their options — lowest barrier to convert</div>
+              </div>
+            </div>
+
+            <HighlightQuote>
+              "The intro offer doesn't need to 'sell massage' — it needs to offer a risk-free first step with a practitioner who gets complex conditions."
+            </HighlightQuote>
+
+            <InsightBox color={C.green} title="These are solution shoppers, not comparison shoppers">
+              {Math.round(veteransN/n*100)}% have already navigated physio, chiro, and medication. They arrived at your funnel because nothing else fully worked. Clinical credibility and empathy — not a general massage pitch — is what earns their trust.
+            </InsightBox>
+          </Card>
+        </div>
+
+        {/* S6: GOALS */}
+        <div style={{marginBottom:32}}>
+          <Step n="6">What They Actually Want to Achieve (Q4)</Step>
+          <Card>
+            <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>Primary goal from treatment</div>
+            <div style={{fontSize:12,color:C.muted,marginBottom:18}}>Stated desired outcome — often more honest than Q1</div>
+            {goalData.map(d=>(
+              <HBar key={d.name} label={d.name} value={d.value} max={n}
+                color={d.name==="Help me relax and de-stress"?C.gold:d.name==="Reduce pain and discomfort"?C.accent:d.name==="Improve mobility and flexibility"?C.green:d.name==="Reduce stress and anxiety"?C.lavender:C.teal}
+              />
+            ))}
+            <InsightBox color={C.gold} title="The real demand hierarchy">
+              "Help me relax and de-stress" is the #1 stated goal even among people with 7+ pain scores. Copy like "feel like yourself again" or "finally get relief" bridges both groups better than either "relaxation massage" or "therapeutic massage" alone.
+            </InsightBox>
+          </Card>
+        </div>
+
+        {/* S7: KEYWORDS */}
+        {kwData.length > 0 && (
+          <div style={{marginBottom:32}}>
+            <Step n="7">Search Keywords Driving Completions</Step>
+            <Card>
+              <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>Paid search terms from quiz completions</div>
+              <div style={{fontSize:12,color:C.muted,marginBottom:18}}>
+                All {n} respondents arrived via Google Ads — gclid attribution captured on {paidCount} of {n} ({Math.round(paidCount/n*100)}%). The remaining {organicCount} are paid clicks where the click ID didn't get stored (a tracking gap, not organic traffic).
+              </div>
+              {kwData.map(d=>(
+                <HBar key={d.name} label={d.name||"(not set)"} value={d.value} max={kwData[0].value}
+                  color={d.name==="massage near me"?C.accent:C.green}
+                  tag={d.name==="massage near me"?`${Math.round(d.value/paidCount*100)}% of attributed`:""}
+                  tagColor={C.accent}
+                />
+              ))}
+
+              <InsightBox color={C.accent} title='"massage near me" dominates — and the real share is even higher'>
+                Of the keywords we can attribute, "massage near me" is already the top driver at {Math.round((keywords["massage near me"]||0)/paidCount*100)}%. Because the {organicCount} unattributed rows are also paid clicks (likely heavy on the same generic terms), the true share of generic-keyword traffic is even higher than what's shown here. People arriving from this keyword average a pain score of {mnmAvgPain}/10 — a clinical audience landing on a generic keyword. The page needs to acknowledge pain even when the search didn't.
+              </InsightBox>
+            </Card>
+          </div>
+        )}
+
+        {/* FOOTER: WHAT WE'RE DOING */}
+        <div style={{background:C.green,borderRadius:14,padding:"24px 24px",color:"#fff"}}>
+          <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:C.goldLight,marginBottom:10}}>What we're doing with this</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(190px,1fr))",gap:14}}>
+            {[
+              ["Letting the quiz do the sorting",
+               "Most paid traffic comes in on generic keywords with no intent signal, so we can't pre-sort visitors into segments. The quiz is doing that work after the click — surfacing real conditions, pain levels, and goals so we can route to the right therapist."],
+              ["Splitting campaigns where intent is clear",
+               "For keywords that do carry intent — clinical modifiers like 'deep tissue' or stated relaxation terms — the two-campaign split sends each visitor to the page that matches what they actually searched for."],
+              ["Writing copy that bridges the gap",
+               "Half the audience are treatment veterans who've already tried physio, chiro, and medication. The page copy speaks to that — clinical credibility and empathy for someone who's been let down before, not a generic massage pitch."],
+              ["Using the intro offer as the entry",
+               "The $49 first session is the risk-free door for all 3 segments — and especially for the veteran who needs a real reason to try one more thing."],
+            ].map(([title,body])=>(
+              <div key={title} style={{background:"rgba(255,255,255,0.08)",borderRadius:10,padding:"14px 14px"}}>
+                <div style={{fontSize:13,fontWeight:700,color:C.goldLight,marginBottom:6}}>{title}</div>
+                <div style={{fontSize:12,color:"rgba(255,255,255,0.75)",lineHeight:1.65}}>{body}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{marginTop:16,textAlign:"center",fontSize:12,color:C.muted,lineHeight:1.7}}>
+          {liveMode ? `🟢 Live data from Google Sheets · Last loaded ${lastFetch}` : "Static data · Connect a Google Sheet to enable live updates"}<br/>
+          Prepared by Smart Practitioner · Maximum Massage Therapy · Quiz Funnel Analysis
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
