@@ -667,12 +667,21 @@ function App() {
               )}
             </div>
 
-            {/* Per-therapist breakdown cards — only for aggregate views.
+            {/* Per-therapist breakdown cards — only for aggregate views. The list
+                of cards depends on which aggregate view is selected:
+                  • focus-massage → just the 4 focus practitioners
+                  • all-massage   → every in-discipline (massage) therapist
+                  • whole-clinic  → every practitioner with utilization data
                 fillPct/emptyPct mirror the Schedule Utilization chart's segments
                 (completed vs. cancelled+idle) so the two read consistently. */}
-            {isAggregateSegment && (
+            {isAggregateSegment && (() => {
+              const breakdownNames =
+                segmentKey === "focus-massage" ? (data.practitioners?.focus || []) :
+                segmentKey === "all-massage"   ? (data.practitioners?.inDiscipline || []) :
+                /* whole-clinic */               Object.keys(data.practitionerUtilization || {});
+              return (
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:10 }}>
-                {(data.practitioners?.focus || []).map(name => {
+                {breakdownNames.map(name => {
                   const snap = data.practitionerUtilization?.[name]?.["12mo"];
                   if (!snap || !snap.shiftHours) return null;
                   const fillPct = Math.round((snap.completedHours / snap.shiftHours) * 100);
@@ -696,7 +705,8 @@ function App() {
                   );
                 })}
               </div>
-            )}
+              );
+            })()}
           </div>
         )}
 
