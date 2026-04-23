@@ -37,22 +37,24 @@ const C = {
   accent: "#C4653A", cancelled: "#C4653A",
 };
 
-// Regenerated 2026-04-22 from the monthly report's data pipeline (scripts/build-monthly-report.mjs)
-// so both reports read the same underlying availability + cancellations exports. Rollback:
-// `git checkout capacity-report-pre-regen-2026-04-22 -- public/reports/capacity/index.html`
+// Regenerated 2026-04-23 from the monthly report's data pipeline (scripts/build-monthly-report.mjs).
+// `completed` = booked appointments that the patient actually showed up to (apptHours - cancelledHours).
+// `pct` = completed / shift, matching the green "Completed" segment in the monthly report's
+// Schedule Utilization chart. Rollback:
+// `git checkout capacity-report-pre-completed-regen-2026-04-23 -- public/reports/capacity/index.html`
 // 4mo window: 2026-01-01 → 2026-04-30. 12mo window: 2025-05-01 → 2026-04-30.
 const DATA = {
   "4mo": [
-    { name: "Brookelyn", booked: 128, cancelled: 25, empty: 196, shift: 324, pct: 40 },
-    { name: "Charlotte", booked:  37, cancelled: 17, empty: 165, shift: 203, pct: 18 },
-    { name: "Lindsey",   booked:  81, cancelled: 13, empty:  75, shift: 156, pct: 52 },
-    { name: "Meagan",    booked:  37, cancelled: 14, empty:  19, shift:  55, pct: 66 },
+    { name: "Brookelyn", completed: 104, cancelled: 25, empty: 196, shift: 324, pct: 32 },
+    { name: "Charlotte", completed:  21, cancelled: 17, empty: 165, shift: 203, pct: 10 },
+    { name: "Lindsey",   completed:  68, cancelled: 13, empty:  75, shift: 156, pct: 43 },
+    { name: "Meagan",    completed:  23, cancelled: 14, empty:  19, shift:  55, pct: 41 },
   ],
   "12mo": [
-    { name: "Brookelyn", booked: 388, cancelled: 64, empty: 571, shift: 959, pct: 40 },
-    { name: "Charlotte", booked: 117, cancelled: 41, empty: 411, shift: 528, pct: 22 },
-    { name: "Lindsey",   booked: 353, cancelled: 46, empty: 291, shift: 644, pct: 55 },
-    { name: "Meagan",    booked: 137, cancelled: 41, empty:  82, shift: 219, pct: 62 },
+    { name: "Brookelyn", completed: 324, cancelled: 64, empty: 571, shift: 959, pct: 34 },
+    { name: "Charlotte", completed:  76, cancelled: 41, empty: 411, shift: 528, pct: 14 },
+    { name: "Lindsey",   completed: 307, cancelled: 46, empty: 291, shift: 644, pct: 48 },
+    { name: "Meagan",    completed:  96, cancelled: 41, empty:  82, shift: 219, pct: 44 },
   ],
 };
 
@@ -65,7 +67,7 @@ const CapacityTooltip = ({ active, payload, label }) => {
   return (
     <div style={{ background: C.green, color: "#fff", borderRadius: 10, padding: "12px 16px", fontSize: 13, fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 20px rgba(0,0,0,0.25)", minWidth: 180 }}>
       <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 14 }}>{label}</div>
-      {[["bookedPct","#a8d4bc","✓ Booked"],["cancelledPct","#e8b499","✗ Cancelled"],["emptyPct","#c8bfb5","○ Never Filled"]].map(([k,col,lbl]) => (
+      {[["completedPct","#a8d4bc","✓ Completed"],["cancelledPct","#e8b499","✗ Cancelled"],["emptyPct","#c8bfb5","○ Never Filled"]].map(([k,col,lbl]) => (
         <div key={k} style={{ display:"flex", justifyContent:"space-between", gap:16, marginBottom:3 }}>
           <span style={{ color: col }}>{lbl}</span>
           <span style={{ fontWeight:700 }}>{get(k)}%</span>
@@ -120,7 +122,7 @@ function App() {
   const active = DATA[win];
   const chartData = active.map(d => ({
     name: d.name,
-    bookedPct:    Math.round(d.booked    / d.shift * 100),
+    completedPct: Math.round(d.completed / d.shift * 100),
     cancelledPct: Math.round(d.cancelled / d.shift * 100),
     emptyPct:     Math.round(d.empty     / d.shift * 100),
   }));
@@ -166,7 +168,7 @@ function App() {
           <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:16 }}>
             <KPI value={`$${perMonthLost.toLocaleString()}`} label="Lost revenue / month" sub="Hours available but unfilled or cancelled — at your standard rate" accent={C.accent} />
             <KPI value={`${Math.round(totalEmpty12/12)}h`}  label="Empty hours / month"  sub="Avg across all 4 therapists over 12 months" color={C.goldLight} />
-            <KPI value="40%"                                 label="Brookelyn's fill rate"  sub="Lowest of the 4 — 60% of her schedule sits empty every week" color={C.greenPale} accent={C.green} />
+            <KPI value="14%"                                 label="Charlotte's fill rate"  sub="Lowest of the 4 — 86% of her schedule sits empty every week" color={C.greenPale} accent={C.green} />
           </div>
 
           <div style={{ background:C.card, borderRadius:14, padding:"24px 20px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)" }}>
@@ -190,8 +192,8 @@ function App() {
                 <XAxis dataKey="name" tick={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, fontWeight:600, fill:C.text }} axisLine={false} tickLine={false} />
                 <YAxis tickFormatter={v=>`${v}%`} tick={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, fill:C.muted }} domain={[0,100]} axisLine={false} tickLine={false} />
                 <Tooltip content={<CapacityTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
-                <Bar dataKey="bookedPct"    stackId="a" fill={C.green}     name="Booked">
-                  <LabelList dataKey="bookedPct"    position="center" formatter={v => v>6?`${v}%`:""} style={{ fill:"#fff", fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:700 }} />
+                <Bar dataKey="completedPct" stackId="a" fill={C.green}     name="Completed">
+                  <LabelList dataKey="completedPct" position="center" formatter={v => v>6?`${v}%`:""} style={{ fill:"#fff", fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:700 }} />
                 </Bar>
                 <Bar dataKey="cancelledPct" stackId="a" fill={C.cancelled} name="Cancelled" />
                 <Bar dataKey="emptyPct"     stackId="a" fill={C.empty}     name="Never Filled" radius={[6,6,0,0]}>
@@ -212,7 +214,7 @@ function App() {
             <div style={{ marginTop:16, background:"#FDF5EE", borderRadius:10, padding:"12px 16px", borderLeft:`3px solid ${C.accent}` }}>
               <div style={{ fontSize:12, fontWeight:700, color:C.accent, marginBottom:4 }}>The pattern holds across both time windows</div>
               <div style={{ fontSize:12, color:C.muted, lineHeight:1.6 }}>
-                Toggle between the last 4 months and the full year — the numbers barely move. Brookelyn sits at 40% either way. Charlotte at 22%. This isn't a slow season. It's a structural gap that advertising can fill.
+                Toggle between the last 4 months and the full year — the numbers barely move. Brookelyn sits around 32–34% either way. Charlotte at 10–14%. This isn't a slow season. It's a structural gap that advertising can fill.
               </div>
             </div>
           </div>
@@ -226,7 +228,7 @@ function App() {
                 <div key={d.name} style={{ background:C.card, borderRadius:10, padding:"14px 16px", boxShadow:"0 1px 6px rgba(0,0,0,0.05)", borderLeft:`3px solid ${col}` }}>
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                     <div style={{ fontSize:14, fontWeight:700, color:C.text }}>{d.name}</div>
-                    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:col }}>{d.pct}% booked</div>
+                    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, fontWeight:700, color:col }}>{d.pct}% completed</div>
                   </div>
                   <div style={{ fontSize:11, color:C.muted, marginTop:4 }}>
                     <strong style={{ color:C.text }}>{idlePct}% idle</strong> · ~${idleRev.toLocaleString()}/mo in unrealized revenue

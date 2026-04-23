@@ -142,7 +142,7 @@ const KPI = ({ label, value, delta, accent, hint }) => {
       <div style={{ fontSize:13, fontWeight:700, color:C.text, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:10 }}>{label}</div>
       <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, fontWeight:700, color:accent||C.green, lineHeight:1, marginBottom:8 }}>{value}</div>
       <div style={{ fontSize:14, color:deltaColor, fontWeight:600 }}>
-        {delta == null ? "No prior-year data" : `${isUp ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}% vs. prior year`}
+        {delta == null ? "No prior-period data" : `${isUp ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}% vs. prior period`}
       </div>
       {hint && <div style={{ fontSize:13, color:C.muted, marginTop:6, lineHeight:1.5 }}>{hint}</div>}
     </div>
@@ -237,6 +237,7 @@ function App() {
   const [segmentKey, setSegmentKey] = useState(null);
   const [dateStart, setDateStart] = useState(null); // YYYY-MM-DD
   const [dateEnd, setDateEnd]     = useState(null); // YYYY-MM-DD
+  const [activePreset, setActivePreset] = useState(null); // "7d" | "30d" | "thismo" | "lastmo" | "12mo" | "lastyr" | null
   const [snapshotKey, setSnapshotKey] = useState("12mo");
   const [activePractitioners, setActivePractitioners] = useState(null); // Set<string> of practitioners in util chart
 
@@ -278,12 +279,19 @@ function App() {
   // Filter daily data to picked date range, roll up to monthly for charts/tables
   const { windowMonths, priorMonths, windowRows, priorRows } = buildRange(segment.daily, dateStart, dateEnd);
 
-  // Aggregate KPIs
+  // KPI deltas compare to the *prior period* (same length, immediately preceding).
+  // The line charts and YoY tables further down still use prior-year (priorRows).
   const sum = (rows, k) => rows.reduce((s, r) => s + (r?.[k] || 0), 0);
+  const sumDaily = (days, k) => days.reduce((s, r) => s + (r?.[k] || 0), 0);
+  const periodLen = daysBetweenInclusive(dateStart, dateEnd);
+  const priorPeriodEnd   = addDays(dateStart, -1);
+  const priorPeriodStart = addDays(priorPeriodEnd, -(periodLen - 1));
+  const priorPeriodDaily = (segment.daily || []).filter(d => d.date >= priorPeriodStart && d.date <= priorPeriodEnd);
+  const hasPriorPeriod = priorPeriodDaily.length > 0;
   const kpis = {
-    revenue:   { cur: sum(windowRows, "revenue"),    prior: priorRows.length ? sum(priorRows, "revenue")    : null },
-    completed: { cur: sum(windowRows, "completed"),  prior: priorRows.length ? sum(priorRows, "completed")  : null },
-    cancelled: { cur: sum(windowRows, "cancelled"),  prior: priorRows.length ? sum(priorRows, "cancelled")  : null },
+    revenue:   { cur: sum(windowRows, "revenue"),    prior: hasPriorPeriod ? sumDaily(priorPeriodDaily, "revenue")   : null },
+    completed: { cur: sum(windowRows, "completed"),  prior: hasPriorPeriod ? sumDaily(priorPeriodDaily, "completed") : null },
+    cancelled: { cur: sum(windowRows, "cancelled"),  prior: hasPriorPeriod ? sumDaily(priorPeriodDaily, "cancelled") : null },
   };
   const booked = sum(windowRows, "booked");
   const cancRate = booked > 0 ? (kpis.cancelled.cur / booked) * 100 : null;
@@ -342,7 +350,7 @@ function App() {
   const avgRate = LIST_RATE;
 
   // Pull the 12mo snapshot for the currently selected segment.
-  const isAggregateSegment = segmentKey === "whole-clinic" || segmentKey === "all-massage";
+  const isAggregateSegment = segmentKey === "whole-clinic" || segmentKey === "all-massage" || segmentKey === "focus-massage";
   const segmentSnap = isAggregateSegment
     ? data.segments?.[segmentKey]?.snapshot?.["12mo"]
     : (data.segments?.[segmentKey]?.snapshot?.["12mo"] || data.practitionerUtilization?.[segmentKey]?.["12mo"]);
@@ -424,6 +432,7 @@ function App() {
     }
     setDateStart(clamp(s));
     setDateEnd(clamp(e));
+    setActivePreset(key);
   };
 
   return (
@@ -451,12 +460,17 @@ function App() {
           <div className="rail-section">
             <div className="rail-label">Date range</div>
             <div className="pill-row">
-              <button className="pill" onClick={() => applyPreset("7d")}>Last 7 days</button>
-              <button className="pill" onClick={() => applyPreset("30d")}>Last 30 days</button>
-              <button className="pill" onClick={() => applyPreset("thismo")}>This month</button>
-              <button className="pill" onClick={() => applyPreset("lastmo")}>Last month</button>
-              <button className="pill" onClick={() => applyPreset("12mo")}>Last 12 months</button>
-              <button className="pill" onClick={() => applyPreset("lastyr")}>Last year</button>
+              {[
+                ["7d", "Last 7 days"], ["30d", "Last 30 days"],
+                ["thismo", "This month"], ["lastmo", "Last month"],
+                ["12mo", "Last 12 months"], ["lastyr", "Last year"],
+              ].map(([k, label]) => (
+                <button
+                  key={k}
+                  className={`pill${activePreset === k ? " pill-active" : ""}`}
+                  onClick={() => applyPreset(k)}
+                >{label}</button>
+              ))}
             </div>
             <div className="date-label">Start</div>
             <input
@@ -465,7 +479,7 @@ function App() {
               value={dateStart || ""}
               min={minDate}
               max={dateEnd || maxDate}
-              onChange={e => setDateStart(e.target.value)}
+              onChange={e => { setDateStart(e.target.value); setActivePreset(null); }}
             />
             <div className="date-label">End</div>
             <input
@@ -474,11 +488,11 @@ function App() {
               value={dateEnd || ""}
               min={dateStart || minDate}
               max={maxDate}
-              onChange={e => setDateEnd(e.target.value)}
+              onChange={e => { setDateEnd(e.target.value); setActivePreset(null); }}
             />
             <div className="rail-prior">
               Current: {fmtDate(dateStart)} – {fmtDate(dateEnd)}<br/>
-              vs. {dateStart && dateEnd ? `${fmtDate(shiftDateYear(dateStart, -1))} – ${fmtDate(shiftDateYear(dateEnd, -1))}` : "no prior-year data"}
+              vs. {dateStart && dateEnd ? `${fmtDate(addDays(dateStart, -daysBetweenInclusive(dateStart, dateEnd)))} – ${fmtDate(addDays(dateStart, -1))}` : "no prior-period data"}
             </div>
           </div>
         </div>
@@ -826,6 +840,11 @@ function addDays(dateStr, n) {
   const d = new Date(dateStr + "T00:00:00Z");
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
+}
+function daysBetweenInclusive(startStr, endStr) {
+  const a = new Date(startStr + "T00:00:00Z").getTime();
+  const b = new Date(endStr   + "T00:00:00Z").getTime();
+  return Math.round((b - a) / 86400000) + 1;
 }
 function firstOfMonth(dateStr) { return dateStr.slice(0, 7) + "-01"; }
 function lastOfMonth(dateStr) {

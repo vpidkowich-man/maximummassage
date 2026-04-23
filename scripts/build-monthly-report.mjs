@@ -409,6 +409,7 @@ async function main() {
   const config = await confirmConfig(detected, loadConfig());
 
   const focus = config.focus || [];
+  const focusSet = new Set(focus);
   const disc  = new Set(config.inDiscipline || []);
 
   // Derive dataThrough (YYYY-MM) from the latest revenue/cancellation date so the
@@ -447,6 +448,17 @@ async function main() {
     snapshot: buildAllSnapshots((s) => disc.has(s)),
   };
 
+  // Focus massage: just the four focus practitioners (subset of all-massage)
+  segments["focus-massage"] = {
+    label: "Focus Massage Only",
+    daily: buildDaily(
+      revenue, cancellations,
+      (r) => { const s = r[COLS.revenue.staff]; return typeof s === "string" && focusSet.has(s.trim()); },
+      (c) => { const s = c[COLS.cancellations.staff]; return typeof s === "string" && focusSet.has(s.trim()); },
+    ),
+    snapshot: buildAllSnapshots((s) => focusSet.has(s)),
+  };
+
   // Per focus practitioner
   for (const name of focus) {
     segments[name] = {
@@ -467,10 +479,11 @@ async function main() {
     snapshot: buildAllSnapshots(() => true),
   };
 
-  // Preserve order: whole-clinic, all-massage, per-therapist (config order)
+  // Preserve order: whole-clinic, all-massage, focus-massage, per-therapist (config order)
   const ordered = {
-    "whole-clinic": segments["whole-clinic"],
-    "all-massage": segments["all-massage"],
+    "whole-clinic":  segments["whole-clinic"],
+    "all-massage":   segments["all-massage"],
+    "focus-massage": segments["focus-massage"],
   };
   for (const n of focus) ordered[n] = segments[n];
 
