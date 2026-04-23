@@ -220,7 +220,7 @@ function detectPractitioners(revenueRows, cancellationRows, availabilities) {
 
 function loadConfig() {
   try { return JSON.parse(readFileSync(CONFIG_PATH, "utf8")); }
-  catch { return { focus: [], inDiscipline: [] }; }
+  catch { return { focus: [], inDiscipline: [], exclude: [] }; }
 }
 
 function saveConfig(config) {
@@ -251,7 +251,7 @@ async function confirmConfig(detected, config) {
     // Non-interactive: use config exactly as-is, don't overwrite. If names don't match the data,
     // segments will be empty and that's a signal the user needs to run interactively to classify.
     console.log("\n(non-interactive — using config as-is, no changes saved)");
-    return { focus: config.focus || [], inDiscipline: config.inDiscipline || [] };
+    return { focus: config.focus || [], inDiscipline: config.inDiscipline || [], exclude: config.exclude || [] };
   }
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -270,7 +270,7 @@ async function confirmConfig(detected, config) {
         if (wantF) newFocus.push(name);
         if (wantD) newDisc.push(name);
       }
-      const updated = { focus: newFocus, inDiscipline: newDisc };
+      const updated = { focus: newFocus, inDiscipline: newDisc, exclude: config.exclude || [] };
       saveConfig(updated);
       console.log("  Saved updated config.");
       return updated;
@@ -279,7 +279,7 @@ async function confirmConfig(detected, config) {
     rl.close();
   }
 
-  const updated = { focus, inDiscipline: disc };
+  const updated = { focus, inDiscipline: disc, exclude: config.exclude || [] };
   saveConfig(updated);
   return updated;
 }
@@ -405,12 +405,23 @@ async function main() {
   const revenue = revBundle.rows;
   const cancellations = cancBundle.rows;
 
-  const detected = detectPractitioners(revenue, cancellations, availabilities);
-  const config = await confirmConfig(detected, loadConfig());
+  const detectedRaw = detectPractitioners(revenue, cancellations, availabilities);
+  const config = await confirmConfig(detectedRaw, loadConfig());
 
-  const focus = config.focus || [];
+  // `exclude` drops practitioners from the report entirely — they don't appear in any
+  // segment, the per-therapist breakdown, or the Schedule Utilization chart.
+  // Use this for staff who shouldn't be on the client's dashboard at all (e.g. left
+  // the clinic, contractor under a separate billing relationship, etc.).
+  const exclude = new Set(config.exclude || []);
+  const detected = detectedRaw.filter(n => !exclude.has(n));
+  if (exclude.size) {
+    const dropped = detectedRaw.filter(n => exclude.has(n));
+    if (dropped.length) console.log(`Excluded from report: ${dropped.join(", ")}`);
+  }
+
+  const focus = (config.focus || []).filter(n => !exclude.has(n));
   const focusSet = new Set(focus);
-  const disc  = new Set(config.inDiscipline || []);
+  const disc  = new Set((config.inDiscipline || []).filter(n => !exclude.has(n)));
 
   // Derive dataThrough (YYYY-MM) from the latest revenue/cancellation date so the
   // snapshot window date ranges can be inferred before we build snapshots.
@@ -472,11 +483,20 @@ async function main() {
     };
   }
 
-  // Whole clinic: everything (including product rows for revenue)
+  // Whole clinic: everything except excluded staff (still includes product/no-staff
+  // revenue rows since they belong to the clinic regardless of who delivered them).
+  const notExcluded = (row, col) => {
+    const s = row[col];
+    return !(s && typeof s === "string" && exclude.has(s.trim()));
+  };
   segments["whole-clinic"] = {
     label: "Whole Clinic",
-    daily: buildDaily(revenue, cancellations, () => true, () => true),
-    snapshot: buildAllSnapshots(() => true),
+    daily: buildDaily(
+      revenue, cancellations,
+      (r) => notExcluded(r, COLS.revenue.staff),
+      (c) => notExcluded(c, COLS.cancellations.staff),
+    ),
+    snapshot: buildAllSnapshots((name) => !exclude.has(name)),
   };
 
   // Preserve order: whole-clinic, all-massage, focus-massage, per-therapist (config order)
