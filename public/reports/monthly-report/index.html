@@ -238,7 +238,6 @@ function App() {
   const [dateStart, setDateStart] = useState(null); // YYYY-MM-DD
   const [dateEnd, setDateEnd]     = useState(null); // YYYY-MM-DD
   const [activePreset, setActivePreset] = useState(null); // "7d" | "30d" | "thismo" | "lastmo" | "12mo" | "lastyr" | null
-  const [snapshotKey, setSnapshotKey] = useState("12mo");
   const [activePractitioners, setActivePractitioners] = useState(null); // Set<string> of practitioners in util chart
 
   useEffect(() => {
@@ -306,14 +305,27 @@ function App() {
   // --- Schedule Utilization bucket chart (3-layer: completed + cancelled + idle) ---
   // Uses `practitionerUtilization` at the data root (all detected practitioners) and a
   // pill selector to toggle bars in/out. Defaults to focus practitioners.
+  // The shift/appt/idle hours come from pre-bucketed availability snapshots (1mo/4mo/12mo
+  // only — no daily granularity), so we pick whichever snapshot length is closest to the
+  // rail's selected window.
   const allPractitioners = Object.keys(data.practitionerUtilization || {}).sort();
   const activeSet = activePractitioners || new Set(data.practitioners?.focus || []);
-  const snapshotAvailable = ["1mo", "4mo", "12mo"].filter(k => {
-    return allPractitioners.some(n => data.practitionerUtilization[n]?.[k]);
-  });
+
+  const utilSnapshotKey = (() => {
+    if (!dateStart || !dateEnd) return "12mo";
+    const days = daysBetweenInclusive(dateStart, dateEnd);
+    const choices = [["1mo", 30], ["4mo", 122], ["12mo", 365]];
+    let best = choices[0][0], bestDiff = Math.abs(days - choices[0][1]);
+    for (const [k, d] of choices) {
+      const diff = Math.abs(days - d);
+      if (diff < bestDiff) { best = k; bestDiff = diff; }
+    }
+    return best;
+  })();
+  const utilSnapshotRange = data.snapshotRanges?.[utilSnapshotKey];
 
   const utilChartData = allPractitioners.filter(n => activeSet.has(n)).map(name => {
-    const snap = data.practitionerUtilization?.[name]?.[snapshotKey];
+    const snap = data.practitionerUtilization?.[name]?.[utilSnapshotKey];
     if (!snap || !snap.shiftHours) return null;
     const completedPct = Math.round((snap.completedHours / snap.shiftHours) * 100);
     const cancelledPct = Math.round((snap.cancelledHours / snap.shiftHours) * 100);
@@ -558,18 +570,8 @@ function App() {
         {allPractitioners.length > 0 && (
           <Card
             title="Schedule Utilization by Therapist"
-            subtitle="Completed, cancelled, and idle as % of scheduled capacity. Toggle any practitioner in the clinic on or off."
+            subtitle={`Completed, cancelled, and idle as % of scheduled capacity. Toggle any practitioner in the clinic on or off. Snapshot: ${SNAPSHOT_LABELS[utilSnapshotKey]}${utilSnapshotRange ? ` (${fmtDate(utilSnapshotRange.start)} – ${fmtDate(utilSnapshotRange.end)})` : ""} — closest to your selected window.`}
           >
-            <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap" }}>
-              {["1mo","4mo","12mo"].filter(k => snapshotAvailable.includes(k)).map(k => (
-                <button key={k} onClick={() => setSnapshotKey(k)} style={{
-                  padding:"5px 14px", borderRadius:20, fontSize:14, fontWeight:600,
-                  background: snapshotKey===k ? C.green : "#EDE9E3",
-                  color: snapshotKey===k ? "#fff" : C.muted,
-                }}>{SNAPSHOT_LABELS[k]}</button>
-              ))}
-            </div>
-
             {/* Practitioner pill selector */}
             <div className="pill-row">
               {allPractitioners.map(n => {
