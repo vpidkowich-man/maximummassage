@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-23T16:12:04.352Z",
+  "updatedAt": "2026-04-23T16:57:54.777Z",
   "dataThrough": "2026-04",
   "lastDataDate": "2026-04-27",
   "snapshotRanges": {
@@ -7408,7 +7408,7 @@
       }
     },
     "focus-massage": {
-      "label": "Focus Massage Only",
+      "label": "4 \"in Focus\" Therapists Only",
       "daily": [
         {
           "date": "2024-05-01",

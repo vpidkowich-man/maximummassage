@@ -450,7 +450,7 @@ async function main() {
 
   // Focus massage: just the four focus practitioners (subset of all-massage)
   segments["focus-massage"] = {
-    label: "Focus Massage Only",
+    label: '4 "in Focus" Therapists Only',
     daily: buildDaily(
       revenue, cancellations,
       (r) => { const s = r[COLS.revenue.staff]; return typeof s === "string" && focusSet.has(s.trim()); },

@@ -416,10 +416,27 @@ function App() {
     switch (key) {
       case "7d":     e = maxDate; s = addDays(maxDate, -6);  break;
       case "30d":    e = maxDate; s = addDays(maxDate, -29); break;
+      case "60d":    e = maxDate; s = addDays(maxDate, -59); break;
+      case "90d":    e = maxDate; s = addDays(maxDate, -89); break;
       case "thismo": e = maxDate; s = firstOfMonth(maxDate); break;
       case "lastmo": {
         const lmFirst = shiftMonthFirst(maxDate, -1);
         s = lmFirst; e = lastOfMonth(lmFirst);
+        break;
+      }
+      case "thisqtr": {
+        const [y, m] = maxDate.split("-").map(Number);
+        const qStartMonth = Math.floor((m - 1) / 3) * 3 + 1;
+        s = `${y}-${String(qStartMonth).padStart(2,"0")}-01`;
+        e = maxDate;
+        break;
+      }
+      case "lastqtr": {
+        const [y, m] = maxDate.split("-").map(Number);
+        const qStartMonth = Math.floor((m - 1) / 3) * 3 + 1;
+        const thisQStart = `${y}-${String(qStartMonth).padStart(2,"0")}-01`;
+        s = shiftMonthFirst(thisQStart, -3);
+        e = lastOfMonth(shiftMonthFirst(thisQStart, -1));
         break;
       }
       case "lastyr": {
@@ -462,7 +479,9 @@ function App() {
             <div className="pill-row">
               {[
                 ["7d", "Last 7 days"], ["30d", "Last 30 days"],
+                ["60d", "Last 60 days"], ["90d", "Last 90 days"],
                 ["thismo", "This month"], ["lastmo", "Last month"],
+                ["thisqtr", "This quarter"], ["lastqtr", "Last quarter"],
                 ["12mo", "Last 12 months"], ["lastyr", "Last year"],
               ].map(([k, label]) => (
                 <button
