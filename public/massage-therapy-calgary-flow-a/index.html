@@ -748,11 +748,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var TALLY_SRC = 'https://tally.so/widgets/embed.js';
   var tallyBooted = false;
 
+  var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid'];
+
+  // Persist any UTMs from the current URL so they survive internal navigation.
+  try {
+    var captureParams = new URLSearchParams(window.location.search);
+    UTM_KEYS.forEach(function (k) {
+      var v = captureParams.get(k);
+      if (v) sessionStorage.setItem(k, v);
+    });
+  } catch (_) { /* sessionStorage may be blocked */ }
+
+  function readUtm(key) {
+    var fromUrl = new URLSearchParams(window.location.search).get(key);
+    if (fromUrl) return fromUrl;
+    try { return sessionStorage.getItem(key); } catch (_) { return null; }
+  }
+
+  function buildTallySrc() {
+    var base = iframe.getAttribute('data-tally-src');
+    var extras = [];
+    UTM_KEYS.forEach(function (k) {
+      var v = readUtm(k);
+      if (v) extras.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
+    });
+    if (!extras.length) return base;
+    return base + (base.indexOf('?') > -1 ? '&' : '?') + extras.join('&');
+  }
+
   function bootTallyOnce() {
     if (tallyBooted) return;
     tallyBooted = true;
     if (!iframe.getAttribute('src')) {
-      iframe.src = iframe.getAttribute('data-tally-src');
+      iframe.src = buildTallySrc();
     }
     if (document.querySelector('script[src="' + TALLY_SRC + '"]')) return;
     var s = document.createElement('script');

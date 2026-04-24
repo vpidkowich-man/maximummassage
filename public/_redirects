@@ -1,0 +1,4 @@
+# Preserve the existing production URL for Flow A (the control)
+# so Google Ads URLs don't break. Status 200 is a rewrite (URL stays
+# the same in the browser); the folder name is dev-only.
+/massage-therapy-calgary/*  /massage-therapy-calgary-flow-a/:splat  200
