@@ -1,4 +1,10 @@
 # Preserve the existing production URL for Flow A (the control)
 # so Google Ads URLs don't break. Status 200 is a rewrite (URL stays
 # the same in the browser); the folder name is dev-only.
+#
+# The first rule catches the no-slash form so Pages' built-in
+# slash-normalization redirect (which drops the query string) never
+# fires — that redirect was stripping UTMs from Google Ads clicks
+# whose Final URL resolved to /massage-therapy-calgary (no slash).
+/massage-therapy-calgary    /massage-therapy-calgary-flow-a/  200
 /massage-therapy-calgary/*  /massage-therapy-calgary-flow-a/:splat  200
