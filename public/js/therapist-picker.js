@@ -145,6 +145,8 @@
           frameborder="0"
           marginheight="0"
           marginwidth="0"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          referrerpolicy="origin"
           title="Find a Therapist Quiz"
         ></iframe>
       </div>
@@ -470,6 +472,43 @@
         e.preventDefault();
         openLightbox();
       }
+    });
+
+    // Fallback: catch Tally postMessage events in case sandbox blocks redirect
+    // entirely. We may not get the recommended therapist, but we still advance
+    // the user into the picker rather than stranding them on the form.
+    window.addEventListener('message', (e) => {
+      try {
+        if (!e || !e.data) return;
+        const raw = typeof e.data === 'string' ? e.data : '';
+        let payload = null;
+        if (raw && raw.indexOf('Tally.') === 0) payload = { event: raw };
+        else if (typeof e.data === 'object') payload = e.data;
+        else if (raw) {
+          try { payload = JSON.parse(raw); } catch (_) { /* not json */ }
+        }
+        if (!payload) return;
+        const evt = payload.event || payload.type || payload;
+        if (typeof evt !== 'string') return;
+        if (evt.indexOf('Tally.FormSubmitted') !== -1 || evt.indexOf('Tally.FormSubmitFinished') !== -1) {
+          if (overlay && overlay.getAttribute('data-open') === 'true') {
+            // Try to extract a recommended therapist from any redirect-like field
+            let recommended = null;
+            const fields = (payload.payload && payload.payload.fields) || payload.fields || [];
+            if (Array.isArray(fields)) {
+              fields.forEach((f) => {
+                const v = (f && (f.answer || f.value || f.label)) || '';
+                if (typeof v !== 'string') return;
+                PRACTITIONER_PATHS.forEach((p) => {
+                  const id = p.replace(/\//g, '');
+                  if (v.toLowerCase().indexOf(id) !== -1) recommended = id;
+                });
+              });
+            }
+            showGrid(recommended);
+          }
+        }
+      } catch (_) { /* swallow */ }
     });
   }
 
