@@ -17,7 +17,7 @@
       shortName: 'Brookelyn B.',
       title: 'Sports + injury recovery specialist',
       specialty: 'Sports + injury recovery',
-      photo: '/images/therapists/brookelyn.webp',
+      photo: '/images/therapists/brookelyn.webp?v=2',
       bio: 'Results-driven therapist who helps active people get back to the things they love. Direct, practical, and grounded in deep anatomical knowledge.',
       tags: ['Sports injuries', 'SI joint + low back', 'Cervical spine', 'Jade stone'],
       review: {
@@ -55,7 +55,7 @@
       shortName: 'Charlotte T.',
       title: 'Chronic pain + myofascial release specialist',
       specialty: 'Chronic pain + cupping',
-      photo: '/images/therapists/charlotte.webp',
+      photo: '/images/therapists/charlotte.webp?v=2',
       bio: 'Results-focused therapist with a calm, clinical approach and a deep commitment to helping people move better and feel better. Advanced skills in injury recovery and chronic pain care.',
       tags: ['Dynamic cupping', 'Myofascial release', 'Trigger point', 'Lymphatic drainage', 'Pre/post-partum', 'Reiki'],
       review: {
@@ -74,7 +74,7 @@
       shortName: 'Lindsey S.',
       title: 'Fascial release + nervous system specialist',
       specialty: 'Fascial release + nervous system',
-      photo: '/images/therapists/lindsey.webp',
+      photo: '/images/therapists/lindsey.webp?v=2',
       bio: 'Calm, detail-oriented therapist with a deeply supportive presence. Blends fascial release techniques with a nervous-system-aware approach to reduce pain, improve movement, and restore balance.',
       tags: ['Fascial release', 'Yoga teacher', 'Doula', 'Acupuncture (in training)'],
       review: {
@@ -477,9 +477,31 @@
     // Fallback: catch Tally postMessage events in case sandbox blocks redirect
     // entirely. We may not get the recommended therapist, but we still advance
     // the user into the picker rather than stranding them on the form.
+    function findRecommendedIn(text) {
+      if (typeof text !== 'string') return null;
+      const lower = text.toLowerCase();
+      let match = null;
+      ['brookelyn', 'meagan', 'charlotte', 'lindsey'].forEach((id) => {
+        if (lower.indexOf(id) !== -1 && !match) match = id;
+      });
+      return match;
+    }
+
+    function recheckIframePath(attempt) {
+      if (!overlay) return;
+      const iframe = overlay.querySelector('[data-quiz-iframe]');
+      if (!iframe) return;
+      try {
+        const path = iframe.contentWindow.location.pathname || '';
+        const id = findRecommendedIn(path);
+        if (id) { showGrid(id); return; }
+      } catch (_) { /* still cross-origin */ }
+      if (attempt < 8) setTimeout(() => recheckIframePath(attempt + 1), 250);
+    }
+
     window.addEventListener('message', (e) => {
       try {
-        if (!e || !e.data) return;
+        if (!e || e.data == null) return;
         const raw = typeof e.data === 'string' ? e.data : '';
         let payload = null;
         if (raw && raw.indexOf('Tally.') === 0) payload = { event: raw };
@@ -488,26 +510,24 @@
           try { payload = JSON.parse(raw); } catch (_) { /* not json */ }
         }
         if (!payload) return;
-        const evt = payload.event || payload.type || payload;
-        if (typeof evt !== 'string') return;
-        if (evt.indexOf('Tally.FormSubmitted') !== -1 || evt.indexOf('Tally.FormSubmitFinished') !== -1) {
-          if (overlay && overlay.getAttribute('data-open') === 'true') {
-            // Try to extract a recommended therapist from any redirect-like field
-            let recommended = null;
-            const fields = (payload.payload && payload.payload.fields) || payload.fields || [];
-            if (Array.isArray(fields)) {
-              fields.forEach((f) => {
-                const v = (f && (f.answer || f.value || f.label)) || '';
-                if (typeof v !== 'string') return;
-                PRACTITIONER_PATHS.forEach((p) => {
-                  const id = p.replace(/\//g, '');
-                  if (v.toLowerCase().indexOf(id) !== -1) recommended = id;
-                });
-              });
-            }
-            showGrid(recommended);
-          }
-        }
+        const evt = payload.event || payload.type || '';
+        const matchTally = (typeof evt === 'string' && evt.indexOf('Tally.') !== -1) ||
+                           (raw && raw.indexOf('Tally.') === 0);
+        if (!matchTally) return;
+        const isSubmit = (typeof evt === 'string' && (evt.indexOf('FormSubmitted') !== -1 || evt.indexOf('FormSubmit') !== -1)) ||
+                         (raw && (raw.indexOf('FormSubmitted') !== -1 || raw.indexOf('FormSubmit') !== -1));
+        if (!isSubmit) return;
+        if (!overlay || overlay.getAttribute('data-open') !== 'true') return;
+
+        // Aggressive recommendation extraction: search the entire stringified
+        // payload for a practitioner id. Catches redirect URLs in any shape.
+        let recommended = null;
+        try { recommended = findRecommendedIn(JSON.stringify(payload)); } catch (_) {}
+
+        showGrid(recommended);
+        // Belt-and-suspenders: keep checking the iframe URL for a moment in
+        // case Tally navigates the iframe shortly after the message fires.
+        recheckIframePath(0);
       } catch (_) { /* swallow */ }
     });
   }
