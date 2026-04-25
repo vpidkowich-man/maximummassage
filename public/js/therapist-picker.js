@@ -17,7 +17,7 @@
       shortName: 'Brookelyn B.',
       title: 'Sports + injury recovery specialist',
       specialty: 'Sports + injury recovery',
-      photo: '/images/therapists/brookelyn.png',
+      photo: '/images/therapists/brookelyn.webp',
       bio: 'Results-driven therapist who helps active people get back to the things they love. Direct, practical, and grounded in deep anatomical knowledge.',
       tags: ['Sports injuries', 'SI joint + low back', 'Cervical spine', 'Jade stone'],
       review: {
@@ -36,7 +36,7 @@
       shortName: 'Meagan B.',
       title: 'Whole-body + craniosacral specialist',
       specialty: 'Whole-body + craniosacral',
-      photo: '/images/therapists/meagan.png',
+      photo: '/images/therapists/meagan.jpg',
       bio: 'Deeply intuitive, movement-aware therapist who takes a whole-body view of pain and recovery. Brings a calming presence and works to help your body find balance without pushing past limits.',
       tags: ['Craniosacral therapy', 'Reflexology', 'Thai massage'],
       review: {
@@ -55,7 +55,7 @@
       shortName: 'Charlotte T.',
       title: 'Chronic pain + myofascial release specialist',
       specialty: 'Chronic pain + cupping',
-      photo: '/images/therapists/charlotte.png',
+      photo: '/images/therapists/charlotte.webp',
       bio: 'Results-focused therapist with a calm, clinical approach and a deep commitment to helping people move better and feel better. Advanced skills in injury recovery and chronic pain care.',
       tags: ['Dynamic cupping', 'Myofascial release', 'Trigger point', 'Lymphatic drainage', 'Pre/post-partum', 'Reiki'],
       review: {
@@ -74,7 +74,7 @@
       shortName: 'Lindsey S.',
       title: 'Fascial release + nervous system specialist',
       specialty: 'Fascial release + nervous system',
-      photo: '/images/therapists/lindsey.png',
+      photo: '/images/therapists/lindsey.webp',
       bio: 'Calm, detail-oriented therapist with a deeply supportive presence. Blends fascial release techniques with a nervous-system-aware approach to reduce pain, improve movement, and restore balance.',
       tags: ['Fascial release', 'Yoga teacher', 'Doula', 'Acupuncture (in training)'],
       review: {
@@ -92,7 +92,7 @@
       name: 'Kassandra Wilson',
       shortName: 'Kassandra W.',
       specialty: 'Deep tissue + sports',
-      photo: '/images/therapists/kassandra.png',
+      photo: '/images/therapists/kassandra.webp',
       disabled: true,
       disabledLabel: 'Fully booked'
     },
@@ -101,7 +101,7 @@
       name: 'Tracy Schneider-Steeves',
       shortName: 'Tracy S.',
       specialty: 'Trigger point + craniosacral',
-      photo: '/images/therapists/tracy.png',
+      photo: '/images/therapists/tracy.webp',
       disabled: true,
       disabledLabel: 'Fully booked'
     }
