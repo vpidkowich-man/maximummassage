@@ -314,13 +314,7 @@
 
   function setView(name) {
     overlay.querySelectorAll('[data-view]').forEach((el) => {
-      if (el.getAttribute('data-view') === name) {
-        el.hidden = false;
-        if (el.classList.contains('detail-panel')) el.setAttribute('data-open', 'true');
-      } else {
-        if (el.classList.contains('detail-panel')) el.setAttribute('data-open', 'false');
-        else el.hidden = true;
-      }
+      el.hidden = el.getAttribute('data-view') !== name;
     });
     const title = overlay.querySelector('.lb__title');
     if (name === 'quiz') title.textContent = 'Find your therapist';
