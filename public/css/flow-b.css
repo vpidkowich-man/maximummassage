@@ -312,24 +312,52 @@
   padding: var(--space-lg);
 }
 
+/* ---------- Lightbox stage wrappers ---------- */
+.lb__stage { position: relative; }
+
+/* ---------- Tally quiz iframe ---------- */
+.quiz-wrap {
+  width: 100%;
+  min-height: 70vh;
+}
+.quiz-wrap iframe {
+  width: 100%;
+  min-height: 70vh;
+  border: 0;
+  display: block;
+}
+
 /* ---------- Therapist picker (lightbox body) ---------- */
+.picker-intro {
+  text-align: center;
+  font-size: 14px;
+  background: var(--offer-bg);
+  color: var(--offer-text);
+  padding: var(--space-sm) var(--space-md);
+  margin: var(--space-md) var(--space-lg) 0;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+.picker-intro strong { color: var(--brand-primary-dark); }
+
 .picker-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-md);
+  gap: var(--space-lg) var(--space-md);
   padding: var(--space-lg);
 }
 @media (min-width: 600px) {
-  .picker-grid { grid-template-columns: repeat(4, 1fr); }
+  .picker-grid { grid-template-columns: repeat(3, 1fr); }
 }
 .picker-card {
+  position: relative;
   background: #fff;
   border: 1px solid var(--brand-primary-border);
   border-radius: var(--radius-md);
   padding: var(--space-md);
   text-align: center;
   cursor: pointer;
-  transition: border-color 120ms ease, transform 120ms ease;
+  transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
   font: inherit;
   color: inherit;
   width: 100%;
@@ -337,12 +365,13 @@
 .picker-card:hover { border-color: var(--brand-primary); }
 .picker-card:active { transform: scale(0.98); }
 .picker-card__photo {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
   margin: 0 auto var(--space-sm);
   background: var(--brand-primary-light);
+  display: block;
 }
 .picker-card__name {
   font-size: 15px;
@@ -361,6 +390,175 @@
   font-size: 13px;
   color: var(--text-muted);
   padding: 0 var(--space-lg) var(--space-lg);
+}
+
+/* Recommended card */
+.picker-card--recommended {
+  border-color: var(--brand-primary);
+  border-width: 2px;
+  box-shadow: 0 6px 18px rgba(74, 124, 107, 0.18);
+}
+.picker-card__badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+/* Disabled card (fully booked) */
+.picker-card--disabled {
+  cursor: not-allowed;
+  background: #fafafa;
+  border-color: #e0e0e0;
+  opacity: 0.65;
+}
+.picker-card--disabled:hover { border-color: #e0e0e0; transform: none; }
+.picker-card--disabled .picker-card__photo { filter: grayscale(100%); }
+.picker-card__disabled-label {
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #b74a4a;
+}
+
+/* ---------- Lead-capture form ---------- */
+.lead-form {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.lead-form__title {
+  text-align: center;
+  font-size: 22px;
+  margin: 0;
+}
+.lead-form__sub {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+.lead-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-body);
+  font-weight: 600;
+}
+.lead-form__field input {
+  font: inherit;
+  font-weight: 400;
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--brand-primary-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--text-dark);
+  -webkit-appearance: none;
+}
+.lead-form__field input:focus {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 1px;
+  border-color: var(--brand-primary);
+}
+.lead-form__err {
+  color: #b74a4a;
+  font-size: 13px;
+  margin: 0;
+  text-align: center;
+}
+
+/* ---------- Offer-closed / notify-me confirmation page ---------- */
+.offer-closed {
+  min-height: calc(100vh - 56px - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-lg);
+  transition: background 400ms ease;
+}
+.offer-closed--success { background: #e6f4ea; }
+
+.offer-closed__card {
+  background: #fff;
+  border: 1px solid var(--brand-primary-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-lg);
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.offer-closed__headline {
+  font-size: 24px;
+  margin: 0 0 var(--space-md);
+  color: var(--text-dark);
+}
+.offer-closed__sub {
+  font-size: 16px;
+  color: var(--text-body);
+  margin: 0 0 var(--space-lg);
+  line-height: 1.5;
+}
+.offer-closed__actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+}
+.btn--yes {
+  background: #2e7d46;
+  color: #fff;
+  min-width: 120px;
+}
+.btn--yes:hover { background: #246139; }
+.btn--no {
+  background: #b74a4a;
+  color: #fff;
+  min-width: 120px;
+}
+.btn--no:hover { background: #8f3737; }
+
+.offer-closed__thanks { text-align: center; }
+.offer-closed__thanks-headline {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f5c33;
+  margin: 0 0 var(--space-md);
+}
+.offer-closed__thanks--muted .offer-closed__thanks-headline { color: var(--text-dark); }
+.offer-closed__thanks-body {
+  font-size: 16px;
+  color: var(--text-body);
+  line-height: 1.6;
+  margin: 0;
+}
+.offer-closed__thanks-note {
+  display: inline-block;
+  margin-top: var(--space-sm);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.offer-closed__fade-in {
+  animation: offerFadeIn 400ms ease both;
+}
+@keyframes offerFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ---------- Therapist detail panel ---------- */
@@ -395,8 +593,8 @@
 .detail-panel__body { padding: 0 var(--space-lg) var(--space-lg); }
 
 .detail-panel__photo {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   object-fit: cover;
   margin: 0 auto var(--space-md);
