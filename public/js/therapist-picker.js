@@ -3,12 +3,12 @@
 
   const TALLY_FORM_SRC = 'https://tally.so/embed/0QPyJQ?alignLeft=1&hideTitle=1&transparentBackground=1';
   const TALLY_SCRIPT = 'https://tally.so/widgets/embed.js';
-  const LEAD_CAPTURE_ENDPOINT = 'REPLACE_WITH_APPS_SCRIPT_URL';
+  const LEAD_CAPTURE_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwt0ZJ1RW8unG2Uj5vyXWC4Xn7k5fhPGpUL57ysYYoGX-i0fkacxyr-uIGhxx3Le_cKFQ/exec';
   const CONFIRMATION_PATH = '/massage-therapy-calgary-flow-b/confirmation/';
 
   const PRACTITIONER_PATHS = ['/brookelyn/', '/meagan/', '/charlotte/', '/lindsey/'];
 
-  const UTM_KEYS = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+  const UTM_KEYS = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'page_variant', 'flow'];
 
   const therapists = [
     {
@@ -395,6 +395,7 @@
     const therapistId = form.getAttribute('data-therapist');
     const t = findTherapist(therapistId);
 
+    const recT = lastRecommendedId ? findTherapist(lastRecommendedId) : null;
     const data = {
       first_name: (form.first_name.value || '').trim(),
       last_name: (form.last_name.value || '').trim(),
@@ -402,6 +403,9 @@
       phone: (form.phone.value || '').trim(),
       selected_therapist: t ? t.name : therapistId,
       selected_therapist_id: therapistId,
+      recommended_therapist: recT ? recT.name : '',
+      recommended_therapist_id: lastRecommendedId || '',
+      matched_recommendation: lastRecommendedId ? (lastRecommendedId === therapistId) : null,
       ...collectUtms()
     };
 

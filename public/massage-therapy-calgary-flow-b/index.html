@@ -18,6 +18,25 @@
   <link rel="stylesheet" href="/css/shared.css">
   <link rel="stylesheet" href="/css/flow-b.css">
 
+  <!-- Stamp page_variant + flow onto the URL (in place, no redirect) so the
+       Tally hidden field auto-populates and downstream analytics can identify
+       the variant without modifying Google Ads tracking templates. Mirrors
+       the equivalent stamp in /massage-therapy-calgary-flow-a/. -->
+  <script>
+  (function () {
+    try {
+      var sp = new URLSearchParams(window.location.search);
+      var stamped = false;
+      if (!sp.get('page_variant')) { sp.set('page_variant', 'b'); stamped = true; }
+      if (!sp.get('flow')) { sp.set('flow', 'b'); stamped = true; }
+      if (stamped && window.history && window.history.replaceState) {
+        var qs = sp.toString();
+        window.history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash);
+      }
+    } catch (_) { /* URLSearchParams or history unavailable */ }
+  })();
+  </script>
+
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],

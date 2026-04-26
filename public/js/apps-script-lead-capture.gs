@@ -26,12 +26,16 @@ const HEADERS = [
   'Email',
   'Phone',
   'Selected Therapist',
+  'Recommended Therapist',
+  'Matched Recommendation',
   'GCLID',
   'utm_source',
   'utm_medium',
   'utm_campaign',
   'utm_term',
   'utm_content',
+  'page_variant',
+  'flow',
   'Notify Preference',
   'Notify Recorded At'
 ];
@@ -84,12 +88,17 @@ function appendLead(sheet, body) {
     body.email || '',
     body.phone || '',
     body.selected_therapist || '',
+    body.recommended_therapist || '',
+    body.matched_recommendation === true ? 'TRUE'
+      : body.matched_recommendation === false ? 'FALSE' : '',
     body.gclid || '',
     body.utm_source || '',
     body.utm_medium || '',
     body.utm_campaign || '',
     body.utm_term || '',
     body.utm_content || '',
+    body.page_variant || '',
+    body.flow || '',
     '',
     ''
   ];
@@ -128,6 +137,8 @@ function updateNotify(sheet, body) {
     row[emailCol] = body.email || '';
     row[HEADERS.indexOf('Phone')] = body.phone || '';
     row[gclidCol] = body.gclid || '';
+    row[HEADERS.indexOf('page_variant')] = body.page_variant || '';
+    row[HEADERS.indexOf('flow')] = body.flow || '';
     row[notifyCol] = body.notify_preference || '';
     row[notifyTsCol] = new Date();
     sheet.appendRow(row);
