@@ -1,22 +1,30 @@
 :root {
-  --brand-primary: #4a7c6b;
-  --brand-primary-dark: #2d5e4a;
-  --brand-primary-light: #eef5f1;
-  --brand-primary-border: #a3c9b2;
-  --brand-primary-muted: #6b8f7a;
+  /* Palette matched to Flow A (Landingi control):
+     primary teal     #36C2C4 / dark #1B6162 / light tints from secondary-0/1
+     accent gold      #F3C768 / cream tints from primary-0/1
+     greys            from tertiary-2/3 */
+  --brand-primary: #1B6162;
+  --brand-primary-dark: #0F3F40;
+  --brand-primary-light: #E1F6F6;
+  --brand-primary-border: #9BE1E2;
+  --brand-primary-muted: #6B6B6B;
 
-  --text-dark: #1a1a1a;
-  --text-body: #333333;
-  --text-muted: #6b8f7a;
+  --brand-accent: #F3C768;
+  --brand-accent-dark: #7A6434;
+
+  --text-dark: #0B0B0B;
+  --text-body: #363636;
+  --text-muted: #6B6B6B;
 
   --bg-white: #ffffff;
-  --bg-light: #eef5f1;
+  --bg-light: #FDF7E8;
   --bg-overlay: rgba(0, 0, 0, 0.5);
 
-  --offer-bg: #d0e8d8;
-  --offer-text: #2d5e4a;
+  --offer-bg: #F9E3B4;
+  --offer-text: #7A6434;
 
-  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Comfortaa', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --space-xs: 4px;
   --space-sm: 8px;
@@ -47,7 +55,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 a { color: var(--brand-primary-dark); }
 
-h1, h2, h3, h4 { color: var(--text-dark); line-height: 1.2; margin: 0 0 var(--space-md); }
+h1, h2, h3, h4 { color: var(--text-dark); line-height: 1.2; margin: 0 0 var(--space-md); font-family: var(--font-heading); font-weight: 700; }
 
 /* ---------- Header ---------- */
 .site-header {
@@ -62,11 +70,19 @@ h1, h2, h3, h4 { color: var(--text-dark); line-height: 1.2; margin: 0 0 var(--sp
   z-index: 50;
 }
 .site-header__logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #fff;
+  font-family: var(--font-heading);
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: #fff;
-  text-decoration: none;
   font-size: 14px;
+}
+.site-header__logo img {
+  height: 32px;
+  width: auto;
+  display: block;
 }
 .site-header__call {
   background: #fff;
@@ -179,6 +195,16 @@ h1, h2, h3, h4 { color: var(--text-dark); line-height: 1.2; margin: 0 0 var(--sp
 @media (min-width: 640px) {
   .lb-overlay { align-items: center; }
   .lb { border-radius: var(--radius-lg); max-height: 88vh; }
+}
+@media (min-width: 1024px) {
+  .lb { max-width: 960px; }
+}
+
+/* Header padding scales up on tablet/desktop so the logo doesn't crowd
+   the call button at wider widths. */
+@media (min-width: 720px) {
+  .site-header { padding: var(--space-md) var(--space-xl); }
+  .site-header__logo img { height: 36px; }
 }
 
 /* ---------- SR only ---------- */
