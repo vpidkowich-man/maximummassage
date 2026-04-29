@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maximum Health — Notify me when availability opens</title>
+  <title>Maximum Health — Hold a spot for me</title>
   <meta name="robots" content="noindex">
   <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/images/favicon.ico" sizes="any">
@@ -12,6 +12,52 @@
   <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,700&family=Comfortaa:300,400,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/shared.css">
   <link rel="stylesheet" href="/css/flow-b.css">
+  <style>
+    /* Confirmation-specific overrides — single-CTA "hold my spot" layout
+       requested 2026-04-29. Uses an explicit sage green so the primary
+       action reads warm rather than the cool teal used elsewhere. */
+    .hold-spot__card { max-width: 560px; }
+    .hold-spot__headline {
+      font-family: var(--font-heading);
+      font-size: clamp(22px, 5vw, 30px);
+      line-height: 1.25;
+      color: var(--text-dark);
+      margin: 0 0 var(--space-md);
+    }
+    .hold-spot__sub {
+      font-size: 16px;
+      line-height: 1.55;
+      color: var(--text-body);
+      margin: 0 0 var(--space-lg);
+    }
+    .btn--sage {
+      background: #6B8F7A;
+      color: #fff;
+      width: 100%;
+      padding: 18px 24px;
+      font-size: 17px;
+      font-weight: 700;
+      border-radius: var(--radius-pill);
+      max-width: 420px;
+    }
+    .btn--sage:hover { background: #547564; }
+    @media (min-width: 720px) {
+      .btn--sage { width: auto; min-width: 320px; }
+    }
+    .hold-spot__decline {
+      display: inline-block;
+      margin-top: var(--space-md);
+      background: transparent;
+      border: 0;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 14px;
+      color: var(--text-muted);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .hold-spot__decline:hover { color: var(--text-dark); }
+  </style>
 
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -28,7 +74,7 @@
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <header class="site-header">
-  <a href="/massage-therapy-calgary-flow-b/" class="site-header__logo" aria-label="Maximum Health Massage Therapy Calgary">
+  <a href="/massage-therapy-calgary/" class="site-header__logo" aria-label="Maximum Health Massage Therapy Calgary">
     <img src="/images/MaximumHealthmassagetherapycalgarycompressed.webp" alt="Maximum Health Massage Therapy Calgary" width="176" height="29">
   </a>
   <a href="tel:+14032830725" class="site-header__call">
@@ -38,15 +84,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </header>
 
 <main class="offer-closed" id="offer-closed-main">
-
-  <section class="offer-closed__card" aria-live="polite">
+  <section class="offer-closed__card hold-spot__card" aria-live="polite">
     <div data-step="ask">
-      <h1 class="offer-closed__headline">Sorry, this offer is no longer available.</h1>
-      <p class="offer-closed__sub">Would you like to be notified when there&rsquo;s more availability?</p>
+      <h1 class="hold-spot__headline">
+        Sorry<span data-firstname-prefix>, </span><span data-firstname>there</span>. There is no more availability for this offer with <span data-therapist>your therapist</span>.
+      </h1>
+      <p class="hold-spot__sub">
+        The new client rate is in high demand. Want us to text you the moment a spot with one of our therapists opens up?
+      </p>
 
-      <div class="offer-closed__actions">
-        <button type="button" class="btn btn--yes" data-notify="yes">Yes</button>
-        <button type="button" class="btn btn--no" data-notify="no">No</button>
+      <button type="button" class="btn btn--sage" data-notify="yes">Yes, hold a spot for me</button>
+
+      <div>
+        <button type="button" class="hold-spot__decline" data-notify="no">No thanks</button>
       </div>
     </div>
 
@@ -67,7 +117,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
   </section>
-
 </main>
 
 <footer class="site-footer">
@@ -95,12 +144,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const stepThanks = main.querySelector('[data-step="thanks"]');
   const stepNoted = main.querySelector('[data-step="noted"]');
 
-  if (lead) {
-    const phoneEl = main.querySelector('[data-thanks-phone]');
-    const emailEl = main.querySelector('[data-thanks-email]');
-    if (phoneEl && lead.phone) phoneEl.textContent = lead.phone;
-    if (emailEl && lead.email) emailEl.textContent = lead.email;
+  // Personalize the headline. Falls back gracefully if the lead is missing
+  // (e.g. user hits the page directly without going through the picker).
+  const firstNameEl = main.querySelector('[data-firstname]');
+  const firstNamePrefix = main.querySelector('[data-firstname-prefix]');
+  const therapistEl = main.querySelector('[data-therapist]');
+
+  if (lead && lead.first_name) {
+    if (firstNameEl) firstNameEl.textContent = lead.first_name;
+  } else {
+    if (firstNamePrefix) firstNamePrefix.textContent = '';
+    if (firstNameEl) firstNameEl.remove();
   }
+
+  if (therapistEl) {
+    if (lead && lead.selected_therapist) {
+      // Use just the first word of the therapist's name for a friendlier read.
+      therapistEl.textContent = String(lead.selected_therapist).split(' ')[0];
+    } else {
+      therapistEl.textContent = 'this therapist';
+    }
+  }
+
+  const phoneEl = main.querySelector('[data-thanks-phone]');
+  const emailEl = main.querySelector('[data-thanks-email]');
+  if (phoneEl && lead && lead.phone) phoneEl.textContent = lead.phone;
+  if (emailEl && lead && lead.email) emailEl.textContent = lead.email;
 
   function swapTo(target) {
     [stepAsk, stepThanks, stepNoted].forEach((el) => { if (el) el.hidden = (el !== target); });
@@ -129,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const btn = e.target.closest('[data-notify]');
     if (!btn) return;
     const answer = btn.getAttribute('data-notify');
-    [stepAsk.querySelectorAll('button')].forEach((list) => list.forEach((b) => { b.disabled = true; }));
+    stepAsk.querySelectorAll('button').forEach((b) => { b.disabled = true; });
     recordAnswer(answer).finally(() => {
       swapTo(answer === 'yes' ? stepThanks : stepNoted);
     });
