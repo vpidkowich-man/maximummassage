@@ -1,0 +1,423 @@
+/* picker.css — styles for the Flow B therapist picker overlay only.
+   Loaded on the Flow B landing page (which otherwise reuses the Flow A
+   Landingi design). Keep this file scoped to picker/lightbox concerns:
+   no global resets, no body/h*/img rules — those would clash with
+   Landingi's absolute-positioned widgets. */
+
+:root {
+  --picker-primary: #1B6162;
+  --picker-primary-dark: #0F3F40;
+  --picker-primary-light: #E1F6F6;
+  --picker-primary-border: #9BE1E2;
+  --picker-accent: #F3C768;
+  --picker-accent-dark: #7A6434;
+  --picker-text-dark: #0B0B0B;
+  --picker-text-body: #363636;
+  --picker-text-muted: #6B6B6B;
+  --picker-bg-light: #FDF7E8;
+  --picker-bg-overlay: rgba(0, 0, 0, 0.5);
+  --picker-offer-bg: #F9E3B4;
+  --picker-offer-text: #7A6434;
+  --picker-radius-sm: 8px;
+  --picker-radius-md: 10px;
+  --picker-radius-lg: 14px;
+  --picker-radius-pill: 20px;
+  --picker-space-xs: 4px;
+  --picker-space-sm: 8px;
+  --picker-space-md: 16px;
+  --picker-space-lg: 24px;
+  --picker-space-xl: 40px;
+}
+
+/* ---------- Lightbox shell ---------- */
+.lb-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--picker-bg-overlay);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2147483646; /* sit above Landingi widgets but below the close-x */
+  opacity: 0;
+  transition: opacity 200ms ease;
+  font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--picker-text-body);
+}
+.lb-overlay[data-open="true"] { display: flex; opacity: 1; }
+.lb-overlay *, .lb-overlay *::before, .lb-overlay *::after { box-sizing: border-box; }
+
+.lb {
+  background: #fff;
+  width: 100%;
+  max-width: 720px;
+  max-height: 92vh;
+  border-top-left-radius: var(--picker-radius-lg);
+  border-top-right-radius: var(--picker-radius-lg);
+  overflow: hidden;
+  position: relative;
+  transform: translateY(24px);
+  transition: transform 200ms ease;
+  display: flex;
+  flex-direction: column;
+}
+.lb-overlay[data-open="true"] .lb { transform: translateY(0); }
+
+.lb__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--picker-space-md) var(--picker-space-lg);
+  border-bottom: 1px solid var(--picker-primary-light);
+}
+.lb__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--picker-text-dark);
+  margin: 0;
+  font-family: 'Raleway', sans-serif;
+}
+.lb__close {
+  background: transparent;
+  border: 0;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--picker-text-muted);
+  padding: 4px 8px;
+  border-radius: var(--picker-radius-sm);
+}
+.lb__close:hover { background: var(--picker-primary-light); }
+.lb__body { overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; }
+
+@media (min-width: 640px) {
+  .lb-overlay { align-items: center; }
+  .lb { border-radius: var(--picker-radius-lg); max-height: 88vh; }
+}
+@media (min-width: 1024px) {
+  .lb { max-width: 960px; }
+}
+
+.lb__stage { position: relative; }
+
+/* ---------- Buttons (scoped to overlay) ---------- */
+.lb-overlay .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 22px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  border: 2px solid transparent;
+  border-radius: var(--picker-radius-pill);
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.2;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+.lb-overlay .btn:active { transform: translateY(1px); }
+.lb-overlay .btn--primary {
+  background: var(--picker-primary);
+  color: #fff;
+}
+.lb-overlay .btn--primary:hover { background: var(--picker-primary-dark); }
+.lb-overlay .btn--ghost {
+  background: transparent;
+  color: var(--picker-primary-dark);
+  border-color: var(--picker-primary-border);
+}
+.lb-overlay .btn--ghost:hover { background: var(--picker-primary-light); }
+.lb-overlay .btn--block { width: 100%; }
+
+/* ---------- Tally quiz iframe ---------- */
+.quiz-wrap {
+  width: 100%;
+  min-height: 70vh;
+}
+.quiz-wrap iframe {
+  width: 100%;
+  min-height: 70vh;
+  border: 0;
+  display: block;
+}
+
+/* ---------- Therapist picker grid ---------- */
+.picker-intro {
+  text-align: center;
+  font-size: 14px;
+  background: var(--picker-offer-bg);
+  color: var(--picker-offer-text);
+  padding: var(--picker-space-sm) var(--picker-space-md);
+  margin: var(--picker-space-md) var(--picker-space-lg) 0;
+  border-radius: var(--picker-radius-sm);
+  line-height: 1.4;
+}
+.picker-intro strong { color: var(--picker-primary-dark); }
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--picker-space-lg) var(--picker-space-md);
+  padding: var(--picker-space-lg);
+}
+@media (min-width: 720px) {
+  .picker-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.picker-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--picker-primary-border);
+  border-radius: var(--picker-radius-md);
+  padding: var(--picker-space-md);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+.picker-card:hover { border-color: var(--picker-primary); }
+.picker-card:active { transform: scale(0.98); }
+.picker-card__photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto var(--picker-space-sm);
+  background: var(--picker-primary-light);
+  display: block;
+  max-width: 100%;
+}
+.picker-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--picker-text-dark);
+  margin: 0 0 2px;
+}
+.picker-card__spec {
+  font-size: 12px;
+  color: var(--picker-text-muted);
+  margin: 0;
+  line-height: 1.3;
+}
+.picker-foot {
+  text-align: center;
+  font-size: 13px;
+  color: var(--picker-text-muted);
+  padding: 0 var(--picker-space-lg) var(--picker-space-lg);
+}
+
+.picker-card--recommended {
+  border-color: var(--picker-primary);
+  border-width: 2px;
+  box-shadow: 0 6px 18px rgba(27, 97, 98, 0.18);
+}
+.picker-card__badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--picker-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: var(--picker-radius-pill);
+  white-space: nowrap;
+}
+
+.picker-card--disabled {
+  cursor: not-allowed;
+  background: #fafafa;
+  border-color: #e0e0e0;
+  opacity: 0.65;
+}
+.picker-card--disabled:hover { border-color: #e0e0e0; transform: none; }
+.picker-card--disabled .picker-card__photo { filter: grayscale(100%); }
+.picker-card__disabled-label {
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #b74a4a;
+}
+
+/* ---------- Lead-capture form ---------- */
+.lead-form {
+  padding: var(--picker-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--picker-space-md);
+}
+.lead-form__title {
+  text-align: center;
+  font-size: 22px;
+  margin: 0;
+  font-family: 'Raleway', sans-serif;
+  color: var(--picker-text-dark);
+}
+.lead-form__sub {
+  text-align: center;
+  font-size: 14px;
+  color: var(--picker-text-muted);
+  margin: 0;
+}
+.lead-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--picker-text-body);
+  font-weight: 600;
+}
+.lead-form__field input {
+  font: inherit;
+  font-weight: 400;
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--picker-primary-border);
+  border-radius: var(--picker-radius-sm);
+  background: #fff;
+  color: var(--picker-text-dark);
+  -webkit-appearance: none;
+}
+.lead-form__field input:focus {
+  outline: 2px solid var(--picker-primary);
+  outline-offset: 1px;
+  border-color: var(--picker-primary);
+}
+.lead-form__err {
+  color: #b74a4a;
+  font-size: 13px;
+  margin: 0;
+  text-align: center;
+}
+
+/* ---------- Therapist detail panel ---------- */
+.detail-panel {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  animation: pickerDetailSlideIn 250ms ease both;
+}
+.detail-panel[hidden] { display: none; }
+@keyframes pickerDetailSlideIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.detail-panel__back {
+  background: transparent;
+  border: 0;
+  padding: var(--picker-space-md) var(--picker-space-lg);
+  color: var(--picker-primary-dark);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+.detail-panel__back:hover { background: var(--picker-bg-light); }
+
+.detail-panel__body { padding: 0 var(--picker-space-lg) var(--picker-space-lg); }
+
+.detail-panel__photo {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto var(--picker-space-md);
+  display: block;
+  background: var(--picker-primary-light);
+  max-width: 100%;
+}
+
+.detail-panel__name {
+  text-align: center;
+  font-size: 22px;
+  margin: 0 0 var(--picker-space-xs);
+  font-family: 'Raleway', sans-serif;
+  color: var(--picker-text-dark);
+}
+.detail-panel__title {
+  text-align: center;
+  color: var(--picker-primary-dark);
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0 0 var(--picker-space-md);
+}
+.detail-panel__bio {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--picker-text-body);
+  margin: 0 0 var(--picker-space-md);
+}
+.detail-panel__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 var(--picker-space-md);
+}
+.detail-panel__tag {
+  background: var(--picker-bg-light);
+  color: var(--picker-primary-dark);
+  padding: 4px 10px;
+  border-radius: var(--picker-radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+}
+.detail-panel__quote {
+  background: var(--picker-bg-light);
+  border-left: 3px solid var(--picker-primary);
+  padding: var(--picker-space-md);
+  font-style: italic;
+  color: var(--picker-text-dark);
+  margin: 0 0 var(--picker-space-sm);
+  font-size: 14px;
+}
+.detail-panel__source {
+  font-size: 12px;
+  color: var(--picker-text-muted);
+  margin: 0 0 var(--picker-space-md);
+}
+.detail-panel__exp {
+  font-size: 13px;
+  color: var(--picker-text-muted);
+  margin: 0 0 var(--picker-space-md);
+}
+.detail-panel__price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--picker-text-dark);
+  margin: 0 0 var(--picker-space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.detail-panel__price-old {
+  text-decoration: line-through;
+  color: var(--picker-text-muted);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ---------- SR only ---------- */
+.lb-overlay .sr-only,
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
